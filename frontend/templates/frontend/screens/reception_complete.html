@@ -1,0 +1,25 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}受付完了{% endblock %}
+
+{% block content %}
+<div class="container-wide text-center">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+    <h1 class="mb-3 text-color">受付完了</h1>
+
+    {% if message %}
+    <p class="lead mb-4 text-color">{{staff_name}}からのメッセージ: </p>
+    <p class="lead mb-4 text-color">{{ message }}</p>
+    {% else %}
+    <p class="lead mb-4 text-color">{{staff_name}}からのメッセージ: </p>
+    <p class="lead mb-4 text-color">一階ロビーでお待ちください。</p>
+    {% endif %}
+
+    <a href="{% url 'frontend:index' %}"
+        class="btn btn-primary-custom btn-large d-flex align-items-center justify-content-center mx-auto text-color"
+        style="max-width: 300px;">
+        完了
+    </a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}通知完了 - 来客受付システム{% endblock %}
+
+{% block content %}
+<div class="container-wide text-center">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+    <h1 class="mb-3 text-color">{{ message_title }}</h1>
+    <p class="lead mb-5 text-color">{{ message_lead }}</p>
+
+    <a href="{% url 'frontend:index' %}"
+        class="btn btn-primary-custom btn-large d-flex justify-content-center align-items-center mx-auto"
+        style="width: 10rem; height: 3rem; font-size: 1.2rem;">
+        完了
+    </a>
+</div>
+{% endblock %}

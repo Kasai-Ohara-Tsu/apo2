@@ -1,0 +1,140 @@
+[
+  {
+    "model": "api.department",
+    "pk": 1,
+    "fields": {
+      "name": "本部",
+      "department_type": "headquarters",
+      "parent": null,
+      "order": 1,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "api.department",
+    "pk": 2,
+    "fields": {
+      "name": "開発部",
+      "department_type": "department",
+      "parent": 1,
+      "order": 2,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "api.department",
+    "pk": 3,
+    "fields": {
+      "name": "営業部",
+      "department_type": "department",
+      "parent": 1,
+      "order": 3,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "api.department",
+    "pk": 4,
+    "fields": {
+      "name": "人事部",
+      "department_type": "department",
+      "parent": 1,
+      "order": 4,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "api.staff",
+    "pk": 1,
+    "fields": {
+      "employee_number": "EMP001",
+      "name": "山田 太郎",
+      "name_kana": "ヤマダ タロウ",
+      "department": 1,
+      "position": "部長",
+      "email": "yamada.taro@example.com",
+      "phone": "080-1000-0001",
+      "substitute1": 2,
+      "substitute2": 3,
+      "is_active": true,
+      "created_at": "2025-10-24T14:00:00Z",
+      "updated_at": "2025-10-24T14:00:00Z"
+    }
+  },
+  {
+    "model": "api.staff",
+    "pk": 2,
+    "fields": {
+      "employee_number": "EMP002",
+      "name": "佐藤 花子",
+      "name_kana": "サトウ ハナコ",
+      "department": 2,
+      "position": "課長",
+      "email": "sato.hanako@example.com",
+      "phone": "080-1000-0002",
+      "substitute1": 1,
+      "substitute2": 4,
+      "is_active": true,
+      "created_at": "2025-10-24T14:00:00Z",
+      "updated_at": "2025-10-24T14:00:00Z"
+    }
+  },
+  {
+    "model": "api.staff",
+    "pk": 3,
+    "fields": {
+      "employee_number": "EMP003",
+      "name": "鈴木 次郎",
+      "name_kana": "スズキ ジロウ",
+      "department": 3,
+      "position": "主任",
+      "email": "suzuki.jiro@example.com",
+      "phone": "080-1000-0003",
+      "substitute1": 2,
+      "substitute2": 5,
+      "is_active": true,
+      "created_at": "2025-10-24T14:00:00Z",
+      "updated_at": "2025-10-24T14:00:00Z"
+    }
+  },
+  {
+    "model": "api.staff",
+    "pk": 4,
+    "fields": {
+      "employee_number": "EMP004",
+      "name": "高橋 美咲",
+      "name_kana": "タカハシ ミサキ",
+      "department": 4,
+      "position": "担当",
+      "email": "takahashi.misaki@example.com",
+      "phone": "080-1000-0004",
+      "substitute1": 1,
+      "substitute2": 3,
+      "is_active": true,
+      "created_at": "2025-10-24T14:00:00Z",
+      "updated_at": "2025-10-24T14:00:00Z"
+    }
+  },
+  {
+    "model": "api.staff",
+    "pk": 5,
+    "fields": {
+      "employee_number": "EMP005",
+      "name": "伊藤 健",
+      "name_kana": "イトウ ケン",
+      "department": 2,
+      "position": "担当",
+      "email": "ito.ken@example.com",
+      "phone": "080-1000-0005",
+      "substitute1": 2,
+      "substitute2": 4,
+      "is_active": true,
+      "created_at": "2025-10-24T14:00:00Z",
+      "updated_at": "2025-10-24T14:00:00Z"
+    }
+  }
+]

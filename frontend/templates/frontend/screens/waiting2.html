@@ -1,0 +1,109 @@
+{% extends "frontend/base.html" %}
+{% block title %}担当者へ通知中{% endblock %}
+
+{% block content %}
+<div class="container-wide text-center">
+    <h1 class="mb-5 text-color">担当者へ通知中</h1>
+
+    <div class="alert alert-info mb-4" role="alert">
+        <p class="mb-0">
+            {{ visitor_company }}の{{ visitor_name }}様から、<br>
+            {{ staff_name }}宛ての来客です
+        </p>
+    </div>
+
+    <div class="mb-4">
+        <div class="loading-spinner mx-auto"></div>
+    </div>
+
+    <div class="mb-4">
+        <p class="display-6 text-color" id="timer">{{ escalation_seconds|default:5 }}秒</p>
+    </div>
+
+    <div class="d-flex flex-column gap-3">
+        <a href="{% url 'frontend:cancel_from_waiting2' %}"
+            class="btn btn-secondary-custom btn-large w-100 d-flex align-items-center justify-content-center">
+            キャンセル
+        </a>
+
+        <button id="respond-btn"
+            class="btn btn-primary-custom btn-large w-100 d-flex align-items-center justify-content-center">
+            対応完了（デモ用）
+        </button>
+    </div>
+</div>
+
+<script>
+    const waitSeconds = parseInt("{{ escalation_seconds|default:5 }}", 10);
+    let timeLeft = waitSeconds;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const visitType = urlParams.get('visit_type') || 'no-appointment';
+    const purposePreset = urlParams.get('purpose_preset') || '';
+    const purposeCustom = urlParams.get('purpose_custom') || '';
+
+    document.addEventListener("DOMContentLoaded", function () {
+        startTimer();
+        setupRespondButton();
+    });
+
+    function startTimer() {
+        updateTimerDisplay();
+        const timer = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+
+                const params = new URLSearchParams({
+                    staff_id: "{{ staff.id }}",
+                    visitor_name: "{{ visitor_name|escapejs }}",
+                    visitor_company: "{{ visitor_company|escapejs }}",
+                    visit_type: visitType,
+                    status: "notified",
+                    purpose_preset: purposePreset,
+                    purpose_custom: purposeCustom
+                });
+
+                window.location.href = `{% url 'frontend:notification_complete' %}?` + params.toString();
+            }
+
+        }, 1000);
+
+        window.mainTimer = timer;
+    }
+
+    function updateTimerDisplay() {
+        const el = document.getElementById('timer');
+        if (el) el.textContent = `${timeLeft}秒`;
+    }
+
+
+
+    // 対応完了
+    function setupRespondButton() {
+        const btn = document.getElementById("respond-btn");
+        if (!btn) return;
+
+        btn.addEventListener("click", function () {
+            clearInterval(window.mainTimer);
+
+            const params = new URLSearchParams({
+                staff_id: "{{ staff.id }}",
+                visitor_name: "{{ visitor_name|escapejs }}",
+                visitor_company: "{{ visitor_company|escapejs }}",
+                visit_type: visitType,
+                status: "manager",
+                purpose_preset: purposePreset,
+                purpose_custom: purposeCustom
+            });
+
+            window.location.href = `{% url 'frontend:reception_complete' %}?` + params.toString();
+        });
+    }
+
+
+</script>
+
+{% endblock %}

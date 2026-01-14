@@ -1,0 +1,73 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}要件入力 or 担当者検索{% endblock %}
+
+{% block content %}
+<div class="container-wide">
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-3 text-color">担当者の方はおわかりでしょうか。</h1>
+        <h4 class="lead text-color">宅配業者の方は宛先がおわかりの場合、担当者検索を選択してください</h4>
+        <h4 class="lead text-color">「担当者呼び出し」か「総務へ通知」を選択してください</h4>
+    </div>
+
+    <div class="d-flex justify-content-center gap-4 flex-wrap button-container">
+        <button id="btn-purpose" class="btn btn-primary-custom2 tall-btn">
+            👀 担当者呼び出し
+        </button>
+
+        <button id="btn-search" class="btn btn-success-custom2 tall-btn">
+            🏃‍➡️ 総務へ通知
+        </button>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <a href="{% url 'frontend:purpose_input' %}"
+            class="btn btn-secondary-custom btn-large d-flex align-items-center justify-content-center"
+            style="width:12rem;">
+            ← 戻る
+        </a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const company = localStorage.getItem("visitor_company") || "";
+        const name = localStorage.getItem("visitor_name") || "";
+
+        // ★ 修正箇所: URLのクエリパラメータから目的情報を取得 ★
+        const urlParams = new URLSearchParams(window.location.search);
+        const purposePreset = urlParams.get("purpose_preset") || "";
+        const purposeCustom = urlParams.get("purpose_custom") || "";
+
+        // ★ 取得した目的情報を localStorage に保存（次の画面で参照される可能性を考慮） ★
+        localStorage.setItem("purpose_preset", purposePreset);
+        localStorage.setItem("purpose_custom", purposeCustom);
+
+        if (!company || !name) {
+            alert("来訪者情報が見つかりません。最初から入力してください。");
+            window.location.href = "{% url 'frontend:visitor_info' %}";
+            return;
+        }
+
+        const urlPurpose = "{% url 'frontend:staff_search2' %}";
+        const urlSearch = "{% url 'frontend:notification_complete' %}";
+
+        // ★ 修正箇所: params に目的情報を追加 ★
+        const params = `?visitor_company=${encodeURIComponent(company)}&visitor_name=${encodeURIComponent(name)}&purpose_preset=${encodeURIComponent(purposePreset)}&purpose_custom=${encodeURIComponent(purposeCustom)}`;
+
+        document.getElementById("btn-purpose").addEventListener("click", () => {
+            window.location.href = urlPurpose + params;
+        });
+
+        document.getElementById("btn-search").addEventListener("click", () => {
+            window.location.href = urlSearch + params;
+        });
+
+        // ★ 修正: 目的情報を取得し、次の画面へ引き継ぐ準備が完了したら localStorage をクリア ★
+        // これにより、次回 purpose_input に戻った際に情報が残らない
+        localStorage.removeItem("purpose_preset");
+        localStorage.removeItem("purpose_custom");
+    });
+</script>
+
+{% endblock %}

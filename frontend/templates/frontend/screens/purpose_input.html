@@ -1,0 +1,125 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}来客受付システム - タプコ{% endblock %}
+
+{% block content %}
+
+<div class="container-wide">
+    <h1 class="text-center mb-4 text-color">用件の入力</h1>
+
+    <p class="lead mb-4 text-color text-center">以下の選択肢からお選びいただくか、ご自由に入力ください。</p>
+
+    <form id="purpose-form" method="get" action="{% url 'frontend:which' %}">
+        {% csrf_token %}
+
+        <!-- 来訪者情報・担当者情報 -->
+        <input type="hidden" name="visitor_name" value="{{ request.GET.visitor_name }}">
+        <input type="hidden" name="visitor_company" value="{{ request.GET.visitor_company }}">
+        <input type="hidden" name="staff_id" value="{{ request.GET.staff_id }}">
+        <input type="hidden" name="purpose_preset" id="purpose_preset">
+        <input type="hidden" name="purpose_custom" id="purpose_custom">
+
+
+        <!-- ラジオボタングリッド (カード形式) -->
+        <div class="d-grid gap-3 justify-content-center"
+            style="grid-template-columns: repeat(4, minmax(230px, 1fr)); max-width: 600px; margin: 0 auto;">
+            {% for purpose in purposes %}
+            <input class="purpose-radio-input" type="radio" name="purpose" id="purpose{{ forloop.counter }}"
+                value="{{ purpose }}">
+            <label class="purpose-radio-label card shadow-sm p-3 text-center" for="purpose{{ forloop.counter }}">
+                <span class="fw-bold ">{{ purpose }}</span>
+            </label>
+            {% endfor %}
+        </div>
+
+
+        <!-- その他入力 -->
+        <div class="mb-4 mt-3">
+            <label for="custom-purpose" class="form-label label-large text-color">その他（自由入力）</label>
+            <textarea class="form-control" id="custom-purpose" name="custom_purpose"
+                placeholder="具体的な用件をご入力ください（最大200文字）" maxlength="200" rows="4" autocomplete="off"></textarea>
+        </div>
+
+        <!-- ボタン -->
+        <div class="d-flex gap-3">
+            <a href="{% url 'frontend:visitor_info' %}"
+                class="btn btn-secondary-custom btn-large flex-grow-1 d-flex justify-content-center align-items-center">
+                ← 戻る
+            </a>
+            <button type="submit" class="btn btn-primary-custom btn-large flex-grow-1" id="submit-btn" disabled>
+                次へ →
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('purpose-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const customInput = document.getElementById('custom-purpose');
+        const presetField = document.getElementById('purpose_preset');
+        const customField = document.getElementById('purpose_custom');
+
+        // ラジオ選択時
+        document.querySelectorAll('.purpose-radio-input').forEach(radio => {
+            radio.addEventListener('change', function () {
+                submitBtn.disabled = false;
+                presetField.value = this.value;
+            });
+        });
+
+        // 自由入力時
+        customInput.addEventListener('input', function () {
+            customField.value = this.value.trim(); // 自由入力を hidden に
+
+            // ボタン有効化条件：ラジオか自由入力のどちらかに値がある場合
+            const selectedRadio = document.querySelector('.purpose-radio-input:checked');
+            submitBtn.disabled = !(this.value.trim() || (selectedRadio && selectedRadio.value));
+        });
+
+
+        // フォーム submit
+        form.addEventListener('submit', function (e) {
+            const selectedRadio = document.querySelector('.purpose-radio-input:checked');
+            const customText = customInput.value.trim();
+
+            if (!selectedRadio && !customText) {
+                e.preventDefault();
+                alert('用件を選択または入力してください。');
+                return false;
+            }
+
+            // 目的情報を localStorage に保存
+            localStorage.setItem("purpose_preset", presetField.value);
+            localStorage.setItem("purpose_custom", customField.value);
+
+            // フォームはそのまま which へ送信される
+        });
+
+        // 初期化処理: 戻るボタンで戻ってきた場合の復元
+        const initialPreset = localStorage.getItem("purpose_preset");
+        const initialCustom = localStorage.getItem("purpose_custom");
+
+        // 初期化処理: 戻るボタンで戻ってきた場合の復元
+        // 両方とも復元できるようにロジックを変更
+        if (initialPreset) {
+            const radio = document.querySelector(`.purpose-radio-input[value="${initialPreset}"]`);
+            if (radio) {
+                radio.checked = true;
+                presetField.value = initialPreset;
+            }
+        }
+        if (initialCustom) {
+            customInput.value = initialCustom;
+            customField.value = initialCustom;
+        }
+
+        // 復元後にボタンの有効/無効をチェック
+        const selectedRadio = document.querySelector('.purpose-radio-input:checked');
+        submitBtn.disabled = !(customInput.value.trim() || (selectedRadio && selectedRadio.value));
+
+    });
+</script>
+
+{% endblock %}

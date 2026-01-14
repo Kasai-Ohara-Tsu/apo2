@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>{% block title %}来客受付システム{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="/media/staff_photos/6.png">
+    <link rel="shortcut icon" href="/media/staff_photos/favi2.svg">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /*********************
+        基本設定
+        *********************/
+        body {
+            background-color: #ffffff;
+            font-family: "Hiragino Kaku Gothic ProN", "メイリオ", Meiryo, sans-serif;
+
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 70px);
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container-wide {
+            max-width: 56rem;
+            width: 100%;
+        }
+
+        .text-color {
+            color: #ffffff;
+            /* #333333; */
+        }
+
+        button {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        footer.footer {
+            /* background-color: #e0e0e0; */
+            background-color: #004540;
+            padding: 1rem 2rem;
+            text-align: center;
+            /* color: #333333; */
+            color: #ffffff;
+        }
+
+        /*********************
+        部署カード・社員カード
+        *********************/
+        .department-item {
+            background-color: #00736c;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .department-item:hover {
+            background-color: #001d1b;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .department-item.active-dept {
+            background-color: #001d1b;
+            border-color: #fff;
+            transform: translateY(-8px);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+
+        .staff-card-clickable {
+            transition: all 0.2s;
+            cursor: pointer;
+            border-radius: 10px;
+            color: #000000;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+
+
+        /* --------------------------
+                社員カード全般
+        -------------------------- */
+        .staff-card {
+            display: flex;
+            flex-direction: column;
+            width: 200px;
+            /* デスクトップ基準 */
+            cursor: pointer;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+
+        .staff-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 画像部分 */
+        .staff-photo-top {
+            width: 100%;
+            aspect-ratio: 1 / 0.9;
+            /* 幅に対して高さを少し短め */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+        }
+
+        .staff-photo-top img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* 中央をトリミングしてカードに収める */
+            display: block;
+        }
+
+        .staff-name-marked mark {
+            background: #ffe58a;
+            padding: 0 0.12rem;
+            border-radius: 0.12rem;
+        }
+
+
+        .card-staff {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            /* X方向, Y方向, ぼかし, 色 */
+            border-radius: 0.75rem;
+            /* 任意で角丸 */
+        }
+
+
+        .card-staff:hover {
+            background-color: #F9F1C0;
+        }
+
+        /*********************
+        リスト・検索結果
+        *********************/
+        .department-staff {
+            max-height: calc(65vh - 160px);
+            overflow-y: auto;
+        }
+
+        .search-result-container {
+            max-height: calc(60vh - 160px);
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border-radius: 20px;
+        }
+
+        #department-tab {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border-radius: 20px;
+        }
+
+        /*********************
+        ボタン・フォーム
+        *********************/
+        .btn-large {
+            min-height: 6rem;
+            font-size: 1.5rem;
+            border-radius: .75rem;
+        }
+
+        .input-large {
+            height: 4rem;
+            font-size: 1.25rem;
+            padding: .75rem 1.5rem;
+            border-radius: .75rem;
+        }
+
+        .label-large {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: .5rem;
+        }
+
+        .tall-btn {
+            font-size: 1.6rem;
+            height: 220px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1 1 0;
+            max-width: 48%;
+            transition: transform .2s;
+        }
+
+        .tall-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .tall-btn {
+                max-width: 100%;
+            }
+        }
+
+        .btn-primary-custom {
+            background: #176dee;
+            border-color: #176dee;
+            color: #fff;
+            color: #fff !important;
+        }
+
+        .btn-primary-custom:hover {
+            background: #125fd8;
+        }
+
+        .btn-secondary-custom {
+            background: #e5e7eb;
+            border-color: #e5e7eb;
+            color: #1f2937;
+            color: #1f2937 !important;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #d1d5db;
+        }
+
+        .btn-success-custom {
+            background: #16a34a;
+            border-color: #16a34a;
+            color: #fff;
+        }
+
+        .btn-success-custom:hover {
+            background: #15803d;
+        }
+
+        .btn-primary-custom2 {
+            background: #2563eb;
+            border-color: #ffffff;
+            border: 2px solid #ffffff;
+            color: #fff;
+        }
+
+        .btn-primary-custom2:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success-custom2 {
+            background: #198754;
+            border-color: #ffffff;
+            border: 2px solid #ffffff;
+            color: #fff;
+        }
+
+        .btn-success-custom2:hover {
+            background: #157347;
+        }
+
+        .choice-btn {
+            min-width: 180px;
+            padding: 1.6rem 2.5rem;
+            border-radius: 1.2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: #000 !important;
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+            opacity: 0.95;
+        }
+
+        /* 各ボタン色 */
+        .choice-btn:nth-child(3) {
+            background-color: #FFD166;
+            /* サンイエロー */
+        }
+
+        .choice-btn:nth-child(1) {
+            background-color: #FF9AA2;
+            /* コーラルピンク */
+            color: #ffffff;
+        }
+
+        .choice-btn:nth-child(2) {
+            background-color: #8EDCE6;
+            /* アクアブルー */
+        }
+
+        /* ラジオボタンを非表示にする */
+        .purpose-radio-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* ラベル（カード）の基本スタイル */
+        .purpose-radio-label {
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: 2px solid #dee2e6;
+            /* Bootstrap border-color */
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+        }
+
+        /* ホバー時のスタイル */
+        .purpose-radio-label:hover {
+            border-color: #007bff;
+            /* Primary color */
+        }
+
+        /* 選択時のスタイル */
+        .purpose-radio-input:checked+.purpose-radio-label {
+            border-color: #007bff;
+            /* Primary color */
+            background-color: #e9f5ff;
+            /* Light blue background */
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+            /* Focus ring effect */
+        }
+
+        /* スマホ対応 */
+        @media (max-width: 768px) {
+            .choice-container {
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+
+            .choice-btn {
+                width: 80%;
+                font-size: 1.3rem;
+                padding: 1.2rem;
+            }
+        }
+
+
+        /*********************
+        ▼▼▼ ここからレスポンシブ強化 ▼▼▼
+        *********************/
+        @media (max-width: 1200px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .container-wide {
+                max-width: 90%;
+            }
+
+            .staff-card {
+                width: 180px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .staff-card {
+                width: 45%;
+                margin-bottom: 1rem;
+            }
+
+            .department-item {
+                margin-bottom: 0.75rem;
+                font-size: 1.1rem;
+                text-align: center;
+            }
+
+            footer.footer {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .staff-card {
+                width: 48%;
+            }
+
+            .staff-photo-top {
+                aspect-ratio: 1 / 1;
+            }
+
+            .tall-btn {
+                height: 180px;
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .container-wide {
+                width: 95%;
+            }
+
+            .staff-card {
+                width: 100%;
+            }
+
+            .tall-btn {
+                max-width: 100%;
+                height: 160px;
+                font-size: 1.2rem;
+            }
+
+            footer.footer {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+
+            body {
+                background-position: center center;
+                background-size: cover;
+            }
+        }
+
+        /*********************
+        ▲▲▲ レスポンシブ強化ここまで ▲▲▲
+        *********************/
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body style="background-image: url('/media/staff_photos/7.png'); 
+             background-size: cover; 
+             background-position: center 10%;
+             background-attachment: fixed;">
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>ご不明な点がございましたら、受付までお声がけください</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateElem = document.getElementById('current-date');
+            if (dateElem) {
+                dateElem.textContent = new Date().toLocaleDateString('ja-JP', {
+                    year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+                });
+            }
+
+            function adjustTabHeight() {
+                const offset = 160; // ヘッダー＋タブボタン＋余白
+
+                const deptTab = document.getElementById('department-tab');
+                if (deptTab) {
+                    deptTab.style.maxHeight = (window.innerHeight - offset) + 'px';
+                    deptTab.style.overflowY = 'auto';
+                    deptTab.style.webkitOverflowScrolling = 'touch';
+                }
+
+                const nameTab = document.getElementById('name-tab');
+                if (nameTab) {
+                    nameTab.style.maxHeight = (window.innerHeight - offset) + 'px';
+                    nameTab.style.overflowY = 'auto';
+                    nameTab.style.webkitOverflowScrolling = 'touch';
+                }
+
+                // 検索結果コンテナもスクロール可能に
+                const searchContainer = document.querySelector('.search-result-container');
+                if (searchContainer) {
+                    searchContainer.style.maxHeight = (window.innerHeight - offset - 80) + 'px';
+                    searchContainer.style.overflowY = 'auto';
+                    searchContainer.style.webkitOverflowScrolling = 'touch';
+                }
+            }
+
+            adjustTabHeight();
+            window.addEventListener('resize', adjustTabHeight);
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,423 @@
+{% extends "frontend/base.html" %}
+
+{% load static %}
+
+{% block title %}担当者検索{% endblock %}
+
+{% block content %}
+
+<div class="container-wide">
+    <h1 class="text-center mb-4 text-color">担当者検索</h1>
+
+    <div class="d-flex justify-content-center gap-3 mb-4">
+        <button class="btn btn-primary-custom" id="dept-tab-btn" onclick="switchTab('department')">部署から検索</button>
+        <button class="btn btn-secondary-custom" id="name-tab-btn" onclick="switchTab('name')">名前から検索</button>
+    </div>
+
+    <!-- 部署タブ -->
+    <div id="department-tab" class="tab-content mb-4"
+        style="max-height: calc(100vh - 150px); overflow-y: auto; display: block;">
+        <div class="border rounded p-3">
+            {% if departments_data %}
+            <!-- 本部タブ横の部署リスト -->
+            <div class="d-flex flex-wrap gap-3 justify-content-center mb-4">
+                {% for dept in departments_data %}
+                <div class="department-item border rounded p-3 text-center shadow-sm {% if forloop.first %}active-dept{% endif %}"
+                    style="min-width:160px; cursor:pointer;" data-dept-id="{{ dept.id }}"
+                    onclick="showDepartmentStaff({{ dept.id }})">
+                    <span class="fw-bold fs-5 text-color">{{ dept.name }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- 各本部・課ごとの社員リスト -->
+            {% for dept in departments_data %}
+            <div class="department-staff" id="dept-{{ dept.id }}"
+                style="{% if forloop.first %}display:block;{% else %}display:none;{% endif %}">
+                <h5 class="mb-3 fw-bold">{{ dept.name }}</h5>
+
+                <!-- 本部直下社員 -->
+                {% if dept.staff_list %}
+                <div class="department-staff-list d-flex flex-wrap gap-3 justify-content-center mb-3">
+                    {% for staff in dept.staff_list %}
+                    <div class="card staff-card shadow-sm text-center" style="width:200px; cursor:pointer;"
+                        onclick="selectStaff('{{ staff.id }}','{{ staff.name }}')">
+                        <!-- 上半分に画像 -->
+                        <div class="staff-photo-top">
+                            {% if staff.photo_url %}
+                            <img src="{{ staff.photo_url.url }}" alt="{{ staff.name }}" class="img-top">
+                            {% else %}
+                            <img src="{% static 'images/default.png' %}" alt="デフォルト画像" class="img-top">
+                            {% endif %}
+                        </div>
+                        <!-- 下半分にテキスト -->
+                        <div class="p-2">
+                            <div class="fw-bold staff-name-marked">{{ staff.name }}</div>
+                            <div class="text-muted small">{{ staff.position }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- 課ごとの社員 -->
+                {% for section in dept.sections %}
+                <h5 class="mt-3 fw-bold">{{ section.full_name }}</h5>
+                {% if section.staff_list %}
+                <div class="department-staff-list d-flex flex-wrap gap-3 justify-content-center mb-3">
+                    {% for staff in section.staff_list %}
+                    <div class="card staff-card shadow-sm text-center" style="width:200px; cursor:pointer;"
+                        onclick="selectStaff('{{ staff.id }}','{{ staff.name }}')">
+                        <!-- 上半分に画像 -->
+                        <div class="staff-photo-top">
+                            {% if staff.photo_url %}
+                            <img src="{{ staff.photo_url.url }}" alt="{{ staff.name }}" class="img-top">
+                            {% else %}
+                            <img src="{% static 'images/default.png' %}" alt="デフォルト画像" class="img-top">
+                            {% endif %}
+                        </div>
+                        <!-- 下半分にテキスト -->
+                        <div class="p-2">
+                            <div class="fw-bold staff-name-marked">{{ staff.name }}</div>
+                            <div class="text-muted small">{{ staff.position }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small">社員はいません</p>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <p class="text-muted">部署情報が見つかりません。</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 名前検索タブ -->
+    <div id="name-tab" class="tab-content" style="display:none;">
+        <form id="search-form" onsubmit="event.preventDefault(); filterStaff();" class="mb-2">
+            <div class="input-group mb-2">
+                <input type="text" id="search-input" class="form-control input-large" placeholder="名前で検索..." />
+            </div>
+        </form>
+
+        <div class="search-result-container border rounded p-3">
+            {% if staff_list %}
+            <div id="staff-list">
+                {% for staff in staff_list %}
+                <div class="card-staff mb-2 staff-item" data-name="{{ staff.name }}"
+                    data-kana="{{ staff.name_kana|default:'' }}" data-id="{{ staff.id }}"
+                    data-position="{{ staff.position }}" data-department_full="{{ staff.department_full_name }}">
+                    <div class="d-flex gap-3 staff-card-clickable text-color" data-staff-id="{{ staff.id }}"
+                        data-staff-name="{{ staff.name }}">
+                        <div class="staff-photo-name">👤</div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold staff-name-marked">{{ staff.name }}</div>
+                            <div class="small staff-meta">{{ staff.department_full_name }} {{ staff.position }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">社員情報が見つかりません。</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <a href="{% url 'frontend:visitor_info' %}"
+            class="btn btn-secondary-custom btn-large d-flex align-items-center justify-content-center"
+            style="width:12rem;">
+            ← 戻る
+        </a>
+    </div>
+
+</div>
+
+<script>
+    /* ---------- 正規化・変換ユーティリティ ---------- */
+
+    function normalizeNFKC(str) { return (str || "").normalize ? str.normalize('NFKC') : (str || ""); }
+
+    // カタカナ→ひらがな
+    function kataToHira(str) {
+        if (!str) return "";
+        return String(str).replace(/[\u30a1-\u30f6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+    }
+
+    // 促音・小書き（ゃゅょぁぃ...）はそのまま扱うが normalize で落ち着かせる
+    function simpleClean(str) {
+        return normalizeNFKC(str || "").trim().replace(/\s+/g, '').replace(/ー/g, '').toLowerCase();
+    }
+
+    /* ローマ字 -> ひらがなマップ（貪欲） */
+    const ROMAJI_MAP = {
+        "kya": "きゃ", "kyu": "きゅ", "kyo": "きょ", "sha": "しゃ", "shu": "しゅ", "sho": "しょ",
+        "cha": "ちゃ", "chu": "ちゅ", "cho": "ちょ", "nya": "にゃ", "nyu": "にゅ", "nyo": "にょ",
+        "hya": "ひゃ", "hyu": "ひゅ", "hyo": "ひょ", "mya": "みゃ", "myu": "みゅ", "myo": "みょ",
+        "rya": "りゃ", "ryu": "りゅ", "ryo": "りょ", "gya": "ぎゃ", "gyu": "ぎゅ", "gyo": "ぎょ",
+        "ja": "じゃ", "ju": "じゅ", "jo": "じょ", "bya": "びゃ", "byu": "びゅ", "byo": "びょ",
+        "pya": "ぴゃ", "pyu": "ぴゅ", "pyo": "ぴょ",
+        "shi": "し", "chi": "ち", "tsu": "つ", "fu": "ふ", "ji": "じ",
+        "ka": "か", "ki": "き", "ku": "く", "ke": "け", "ko": "こ",
+        "sa": "さ", "si": "し", "su": "す", "se": "せ", "so": "そ",
+        "ta": "た", "ti": "ち", "tu": "つ", "te": "て", "to": "と",
+        "na": "な", "ni": "に", "nu": "ぬ", "ne": "ね", "no": "の",
+        "ha": "は", "hi": "ひ", "hu": "ふ", "he": "へ", "ho": "ほ",
+        "ma": "ま", "mi": "み", "mu": "む", "me": "め", "mo": "も",
+        "ya": "や", "yu": "ゆ", "yo": "よ", "ra": "ら", "ri": "り", "ru": "る", "re": "れ", "ro": "ろ",
+        "wa": "わ", "wo": "を", "n": "ん",
+        "ga": "が", "gi": "ぎ", "gu": "ぐ", "ge": "げ", "go": "ご",
+        "za": "ざ", "zi": "じ", "zu": "ず", "ze": "ぜ", "zo": "ぞ",
+        "da": "だ", "di": "ぢ", "du": "づ", "de": "で", "do": "ど",
+        "ba": "ば", "bi": "び", "bu": "ぶ", "be": "べ", "bo": "ぼ",
+        "pa": "ぱ", "pi": "ぴ", "pu": "ぷ", "pe": "ぺ", "po": "ぽ",
+        "a": "あ", "i": "い", "u": "う", "e": "え", "o": "お"
+    };
+
+    // ローマ字 -> ひらがな（貪欲マッチ）
+    function romajiToHiragana(input) {
+        if (!input) return "";
+        let s = simpleClean(input);
+        let out = "";
+        let i = 0;
+        while (i < s.length) {
+            // 促音（子音二重）処理
+            if (i + 1 < s.length && s[i] === s[i + 1] && /[bcdfghjklmnpqrstvwxyz]/.test(s[i])) {
+                out += "っ"; i++; continue;
+            }
+            // try 3,2,1
+            let matched = null;
+            if (i + 3 <= s.length) {
+                const c3 = s.substr(i, 3);
+                if (ROMAJI_MAP[c3]) matched = ROMAJI_MAP[c3];
+            }
+            if (!matched && i + 2 <= s.length) {
+                const c2 = s.substr(i, 2);
+                if (ROMAJI_MAP[c2]) matched = ROMAJI_MAP[c2];
+            }
+            if (!matched) {
+                const c1 = s.substr(i, 1);
+                if (ROMAJI_MAP[c1]) matched = ROMAJI_MAP[c1];
+            }
+            if (matched) { // advance by length of matched key
+                // find length
+                if (i + 3 <= s.length && ROMAJI_MAP[s.substr(i, 3)]) { out += ROMAJI_MAP[s.substr(i, 3)]; i += 3; }
+                else if (i + 2 <= s.length && ROMAJI_MAP[s.substr(i, 2)]) { out += ROMAJI_MAP[s.substr(i, 2)]; i += 2; }
+                else { out += ROMAJI_MAP[s.substr(i, 1)]; i += 1; }
+            } else {
+                i++;
+            }
+        }
+        return out;
+    }
+
+    // 統一：任意の入力（ローマ字/カナ/漢字/ひらがな）を「ひらがな文字列」にする
+    function toHiraganaUnified(src) {
+        if (!src) return "";
+        let s = normalizeNFKC(src);
+        // ローマ字が含まれていればローマ字→ひらがな
+        if (/[a-zA-Z]/.test(s)) {
+            return romajiToHiragana(s);
+        }
+        // カタカナをひらがなに
+        s = kataToHira(s);
+        // 正規化（長音除去など）
+        s = s.replace(/ー/g, '').replace(/\s+/g, '').toLowerCase();
+        return s;
+    }
+
+    // 揺れ：濁音→清音 などの候補を作る（キーワードが1文字のとき有効）
+    function expandVariantsHira(hira) {
+        if (!hira) return [hira];
+        const dak = {
+            "が": "か", "ぎ": "き", "ぐ": "く", "げ": "け", "ご": "こ",
+            "ざ": "さ", "じ": "し", "ず": "す", "ぜ": "せ", "ぞ": "そ",
+            "だ": "た", "ぢ": "ち", "づ": "つ", "で": "て", "ど": "と",
+            "ば": "は", "び": "ひ", "ぶ": "ふ", "べ": "へ", "ぼ": "ほ",
+            "ぱ": "は", "ぴ": "ひ", "ぷ": "ふ", "ぺ": "へ", "ぽ": "ほ"
+        };
+        const res = new Set([hira]);
+        if (hira.length === 1 && dak[hira]) res.add(dak[hira]);
+        return Array.from(res);
+    }
+
+    /* ---------- マッチングロジック ---------- */
+    // ルール：キーワードが1文字なら「先頭一致（startsWith）」で検索。2文字以上は部分一致（includes）。
+    // 比較対象は staff の name_kana（DBにあるカナ）をひらがな化したもの。漢字 name もひらがな化して念のため比較。
+
+    function isMatchForTerm(itemName, itemKana, rawInput) {
+        const termHira = toHiraganaUnified(rawInput);
+        if (!termHira) return true; // 空検索は表示
+
+        const kanaH = toHiraganaUnified(itemKana || "");
+        const nameH = toHiraganaUnified(itemName || "");
+
+        // expand variants for 1-char term (濁音→清音など)
+        const termsToTry = (termHira.length === 1) ? expandVariantsHira(termHira) : [termHira];
+
+        for (const t of termsToTry) {
+            if (t.length === 1) {
+                if (kanaH.startsWith(t) || nameH.startsWith(t)) return true;
+            } else {
+                if (kanaH.includes(t) || nameH.includes(t)) return true;
+            }
+        }
+        // fallback: raw ascii partial match on original name (for roman-latin mixed)
+        const rawClean = simpleClean(rawInput);
+        if (rawClean) {
+            if ((itemName || "").toLowerCase().indexOf(rawClean) !== -1) return true;
+        }
+        return false;
+    }
+
+    /* ---------- UI: フィルター実行 ---------- */
+    function filterStaff() {
+        const raw = document.getElementById('search-input').value || "";
+        // remove previous no-result
+        const prev = document.getElementById('no-result');
+        if (prev) prev.remove();
+
+        const items = document.querySelectorAll('.staff-item');
+        let hit = false;
+        items.forEach(item => {
+            const name = item.dataset.name || "";
+            const kana = item.dataset.kana || "";
+            const ok = isMatchForTerm(name, kana, raw);
+            item.style.display = ok ? "block" : "none";
+            // highlight if match (simple mark using hira index on nameH)
+            const wrap = item.querySelector('.staff-name-marked');
+            if (ok) {
+                hit = true;
+                // mark attempt: find index in nameH and map back roughly to original (best-effort)
+                const termHira = toHiraganaUnified(raw);
+                if (termHira) {
+                    const nameH = toHiraganaUnified(name);
+                    const idx = nameH.indexOf(termHira);
+                    if (idx !== -1 && wrap) {
+                        // naive: slice original by char counts (best-effort)
+                        const pre = escapeHtml(name.slice(0, idx));
+                        const mid = escapeHtml(name.slice(idx, idx + termHira.length));
+                        const post = escapeHtml(name.slice(idx + termHira.length));
+                        wrap.innerHTML = `${pre}<mark>${mid}</mark>${post}`;
+                    } else {
+                        wrap.innerHTML = escapeHtml(name);
+                    }
+                } else {
+                    wrap.innerHTML = escapeHtml(name);
+                }
+            } else {
+                if (wrap) wrap.innerHTML = escapeHtml(name);
+            }
+        });
+
+        if (!hit) {
+            const list = document.getElementById('staff-list');
+            if (list) {
+                list.insertAdjacentHTML('beforeend', '<p class="text-muted text-center mt-3" id="no-result">該当する社員が見つかりません。</p>');
+            }
+        }
+    }
+
+    /* ---------- DOM イベント設定 ---------- */
+    document.addEventListener('DOMContentLoaded', function () {
+        // staff-cardクリックで選択
+        document.querySelectorAll('.staff-card-clickable').forEach(card => {
+            card.addEventListener('click', function () {
+                selectStaff(this.dataset.staffId, this.dataset.staffName);
+            });
+        });
+
+        const search = document.getElementById('search-input');
+        if (search) {
+            search.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); filterStaff(); } });
+            let timer = null;
+            search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(filterStaff, 120); });
+        }
+
+        // 初期は全表示
+        filterStaff();
+    });
+
+    /* ---------- 既存関数群（テンプレ内にある既存の関数をそのまま利用） ---------- */
+    function escapeHtml(str) {
+        return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    function switchTab(tab) {
+        const deptBtn = document.getElementById('dept-tab-btn');
+        const nameBtn = document.getElementById('name-tab-btn');
+
+        document.getElementById('department-tab').style.display = (tab === 'department') ? 'block' : 'none';
+        document.getElementById('name-tab').style.display = (tab === 'name') ? 'block' : 'none';
+
+        if (tab === 'department') {
+            deptBtn.className = 'btn btn-primary-custom';
+            nameBtn.className = 'btn btn-secondary-custom';
+        } else {
+            deptBtn.className = 'btn btn-secondary-custom';
+            nameBtn.className = 'btn btn-primary-custom';
+        }
+    }
+
+
+    function showDepartmentStaff(deptId) {
+        document.querySelectorAll('.department-staff').forEach(el => el.style.display = 'none');
+        const block = document.getElementById('dept-' + deptId);
+        if (block) block.style.display = 'block';
+        document.querySelectorAll('.department-item').forEach(el => el.classList.remove('active-dept'));
+        const deptItem = document.querySelector(`[data-dept-id="${deptId}"]`);
+        if (deptItem) deptItem.classList.add('active-dept');
+    }
+
+    function selectStaff(id, name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const company = urlParams.get('visitor_company') || localStorage.getItem('visitor_company') || '';
+        const visitor = urlParams.get('visitor_name') || localStorage.getItem('visitor_name') || '';
+        const url = "{% url 'frontend:waiting' %}";
+        const purpose_preset = new URLSearchParams(window.location.search).get('purpose_preset') || '';
+        const purpose_custom = new URLSearchParams(window.location.search).get('purpose_custom') || '';
+
+        const p = new URLSearchParams({
+            staff_id: id,
+            staff_name: name,
+            visitor_company: company,
+            visitor_name: visitor,
+            purpose_preset: purpose_preset,
+            purpose_custom: purpose_custom,
+            visit_type: "appointment"
+        });
+        window.location.href = `${url}?${p.toString()}`;
+    }
+
+
+    function showDepartmentStaff(deptId) {
+        // 1. すべてのスタッフリストを非表示にする
+        document.querySelectorAll('.department-staff').forEach(el => {
+            el.style.display = 'none';
+        });
+
+        // 2. 選択されたスタッフリストを表示する
+        const selectedDept = document.getElementById(`dept-${deptId}`);
+        if (selectedDept) {
+            selectedDept.style.display = 'block';
+        }
+
+        // 3. すべてのボタンからアクティブクラスを削除
+        document.querySelectorAll('.department-item').forEach(el => {
+            el.classList.remove('active-dept');
+        });
+
+        // 4. クリックされたボタンにアクティブクラスを付与
+        const clickedButton = document.querySelector(`.department-item[data-dept-id="${deptId}"]`);
+        if (clickedButton) {
+            clickedButton.classList.add('active-dept');
+        }
+    }
+</script>
+{% endblock %}

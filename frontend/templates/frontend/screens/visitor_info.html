@@ -1,0 +1,107 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}来訪者情報の入力{% endblock %}
+
+{% block content %}
+<div class="container-wide">
+    <h1 class="text-center mb-5 text-color">来訪者情報の入力</h1>
+
+    <form id="visitor-form" method="post">
+        {% csrf_token %}
+
+        <div class="mb-4">
+            <label for="company" class="form-label label-large text-color">
+                会社名 <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control input-large" id="company" name="company" placeholder="例：株式会社〇〇"
+                required>
+        </div>
+
+        <div class="mb-4">
+            <label for="name" class="form-label label-large text-color">
+                お名前 <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control input-large" id="name" name="name" placeholder="例：山田 太郎" required>
+        </div>
+
+
+        <input type="hidden" id="purpose" name="purpose" value="">
+
+        <div class="d-flex gap-3">
+            <a href="{% url 'frontend:index' %}"
+                class="btn btn-secondary-custom btn-large flex-grow-1 d-flex align-items-center justify-content-center">
+                ← 戻る
+            </a>
+
+            <button type="submit"
+                class="btn btn-primary-custom btn-large flex-grow-1 d-flex align-items-center justify-content-center">
+                次へ →
+            </button>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("visitor-form");
+        const companyInput = document.getElementById("company");
+        const nameInput = document.getElementById("name");
+        // const purposeInput = document.getElementById("purpose"); // hiddenフィールドは不要になるためコメントアウト
+
+        // === クエリパラメータから visit_type 取得 ===
+        const urlParams = new URLSearchParams(window.location.search);
+        // ★ 修正1: パラメータ名を visit_type に変更 ★
+        let visitType = urlParams.get("visit_type");
+
+        // === localStorageから復元（クエリがなければ） ===
+        // ★ 修正2: localStorageのキーも visit_type に変更 ★
+        if (!visitType) {
+            visitType = localStorage.getItem("visit_type") || "";
+        }
+
+        // === localStorageに保存（再訪時用） ===
+        if (visitType) {
+            localStorage.setItem("visit_type", visitType);
+        }
+
+        // === フォーム送信時処理 ===
+        form.addEventListener("submit", function (e) {
+            e.preventDefault(); // デフォルトの送信を一旦キャンセル
+
+            const company = companyInput.value.trim();
+            const name = nameInput.value.trim();
+
+            if (!company || !name) {
+                alert("会社名とお名前を入力してください。");
+                return;
+            }
+
+            // UTF-8のまま保存
+            localStorage.setItem("visitor_company", company);
+            localStorage.setItem("visitor_name", name);
+
+            // ★ 修正3: 次の画面へリダイレクトする際に visit_type をクエリパラメータとして付加 ★
+            let nextUrl = "";
+            if (visitType === "appointment") {
+                nextUrl = "{% url 'frontend:staff_search' %}";
+            } else if (visitType === "no-appointment") {
+                nextUrl = "{% url 'frontend:purpose_input' %}";
+            } else {
+                // visitType 不明ならトップに戻す
+                nextUrl = "{% url 'frontend:index' %}";
+            }
+
+            // visitor_info.html (修正後)
+            const params = new URLSearchParams({
+                visit_type: visitType,
+                visitor_name: name, // 追加
+                visitor_company: company // 追加
+            });
+            window.location.href = `${nextUrl}?${params.toString()}`;
+
+        });
+    });
+</script>
+
+{% endblock %}
