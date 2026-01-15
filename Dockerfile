@@ -2,6 +2,7 @@ FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=reception_system.settings
+ENV PORT=8000
 
 
 WORKDIR /app
