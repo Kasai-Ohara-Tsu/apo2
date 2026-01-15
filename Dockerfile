@@ -1,23 +1,19 @@
-# Pythonのバージョンを指定
 FROM python:3.11-slim
 
-# 標準出力・標準エラー出力をバッファしない設定（ログがすぐに見れるように）
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=apo2.settings
 
-# 作業ディレクトリの設定
 WORKDIR /app
 
-# 依存関係のインストール
-COPY requirements.txt /app/
+# 依存関係
+COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# プロジェクトのコードをコピー
-COPY . /app/
+# アプリ本体
+COPY . .
 
-# 静的ファイルを集める (ビルド時に実行する場合)
-# 注意: データベース接続が必要な処理はここでは行わない
+# collectstatic はビルド時に実行
 RUN python manage.py collectstatic --noinput
 
-# コンテナ起動時に実行するコマンド
-# マイグレーションを実行してからGunicornを起動
-CMD python manage.py migrate && gunicorn reception_system.wsgi:application --bind 0.0.0.0:$PORT
+# 起動時に実行
+CMD python manage.py migrate && gunicorn apo2.wsgi:application --bind 0.0.0.0:$PORT
