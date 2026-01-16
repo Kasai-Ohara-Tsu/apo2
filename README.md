@@ -212,3 +212,4 @@ python manage.py loaddata initial_data.json
 ---
 
 **最終更新**: 2025年月日
+# tapco
