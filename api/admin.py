@@ -11,10 +11,10 @@ from django.db.models.functions import Coalesce
 # Department Admin
 # -------------------
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'department_type', 'order')
+    list_display = ('name','id' 'department_type', 'order')
     list_display_links = ('name',)
     list_filter = ('department_type',)
-    search_fields = ('name',)
+    search_fields = ('name','id')
 
 # -------------------
 # Staff Resource for ImportExport
@@ -146,9 +146,8 @@ class VisitAdmin(admin.ModelAdmin):
 # -------------------
 @admin.register(SystemSetting)
 class SystemSettingAdmin(admin.ModelAdmin):
-    list_display = ("id", "key", "value", "updated_at")
+    list_display = ( "description", "value", "updated_at")
     search_fields = ("key", "value")
-
     fieldsets = (
         (None, {
             "fields": ("key", "value", "description")
