@@ -11,7 +11,7 @@ from django.db.models.functions import Coalesce
 # Department Admin
 # -------------------
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('name','id' 'department_type', 'order')
+    list_display = ('name','id', 'department_type', 'order')
     list_display_links = ('name',)
     list_filter = ('department_type',)
     search_fields = ('name','id')
