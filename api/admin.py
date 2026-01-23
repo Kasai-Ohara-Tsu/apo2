@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
-from .models import Department, Staff, Visit, SystemSetting, NotificationLog
+from .models import Department, Staff, Visit, SystemSetting
 from django.db.models import F
 from django.db.models.functions import Coalesce
 
@@ -175,4 +175,4 @@ class SystemSettingAdmin(admin.ModelAdmin):
 admin.site.register(Department, DepartmentAdmin)
 admin.site.register(Staff, StaffAdmin)
 admin.site.register(Visit, VisitAdmin)
-admin.site.register(NotificationLog, NotificationLogAdmin)
+# admin.site.register(NotificationLog, NotificationLogAdmin)
