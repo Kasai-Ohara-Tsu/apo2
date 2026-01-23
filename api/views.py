@@ -2,8 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
-from .models import Department, Staff, Visit, SystemSetting, NotificationLog
-from .serializers import DepartmentSerializer, StaffSerializer, VisitSerializer, SystemSettingSerializer, NotificationLogSerializer
+from .models import Department, Staff, Visit, SystemSetting
+from .serializers import DepartmentSerializer, StaffSerializer, VisitSerializer, SystemSettingSerializer
 import pandas as pd
 from io import StringIO
 from django.http import HttpResponse
