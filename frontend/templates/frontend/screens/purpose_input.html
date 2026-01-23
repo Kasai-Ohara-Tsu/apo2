@@ -21,13 +21,18 @@
 
 
         <!-- ラジオボタングリッド (カード形式) -->
-        <div class="d-grid gap-3 justify-content-center"
-            style="grid-template-columns: repeat(4, minmax(230px, 1fr)); max-width: 600px; margin: 0 auto;">
+        <!-- ラジオボタングリッド（3列固定） -->
+        <div class="d-grid gap-3 justify-content-center" style="
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+        max-width: 900px;
+        margin: 0 auto;
+     ">
             {% for purpose in purposes %}
             <input class="purpose-radio-input" type="radio" name="purpose" id="purpose{{ forloop.counter }}"
                 value="{{ purpose }}">
-            <label class="purpose-radio-label card shadow-sm p-3 text-center" for="purpose{{ forloop.counter }}">
-                <span class="fw-bold ">{{ purpose }}</span>
+            <label class="purpose-radio-label card shadow-sm p-4 text-center" for="purpose{{ forloop.counter }}"
+                style="cursor:pointer;">
+                <span class="fw-bold">{{ purpose }}</span>
             </label>
             {% endfor %}
         </div>
