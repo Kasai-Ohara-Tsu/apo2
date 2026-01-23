@@ -523,12 +523,9 @@ def purpose_input(request):
     purposes = [
         "新規取引のご相談",
         "既存取引のご相談",
-        "採用に関するご相談",
-        "商品・サービスのお問い合わせ",
-        "メディア取材のお申し込み",
-        "その他のお問い合わせ",
-        "配達の方",
+        "配達・納品の方",
         "集荷の方",
+        "その他のお問い合わせ",
     ]
 
     return render(request, "frontend/screens/purpose_input.html", {
