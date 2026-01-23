@@ -238,7 +238,7 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(setting)
         return Response(serializer.data)
 
-class NotificationLogViewSet(viewsets.ModelViewSet):
-    queryset = NotificationLog.objects.all().order_by("-sent_at")
-    serializer_class = NotificationLogSerializer
+# class NotificationLogViewSet(viewsets.ModelViewSet):
+#     queryset = NotificationLog.objects.all().order_by("-sent_at")
+#     serializer_class = NotificationLogSerializer
 

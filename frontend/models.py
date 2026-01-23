@@ -1,5 +1,5 @@
 # frontend/models.py
-from api.models import Department, Staff, Visit, NotificationLog, SystemSetting
+from api.models import Department, Staff, Visit, SystemSetting
 
 from django.db import models
 from django.utils import timezone
