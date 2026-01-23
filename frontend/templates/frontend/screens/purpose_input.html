@@ -26,16 +26,17 @@
         grid-template-columns: repeat(3, minmax(220px, 1fr));
         max-width: 900px;
         margin: 0 auto;
-     ">
+        justify-items: center;">
             {% for purpose in purposes %}
             <input class="purpose-radio-input" type="radio" name="purpose" id="purpose{{ forloop.counter }}"
                 value="{{ purpose }}">
             <label class="purpose-radio-label card shadow-sm p-4 text-center" for="purpose{{ forloop.counter }}"
-                style="cursor:pointer;">
+                style="cursor:pointer; width:100%;">
                 <span class="fw-bold">{{ purpose }}</span>
             </label>
             {% endfor %}
         </div>
+
 
 
         <!-- その他入力 -->
