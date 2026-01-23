@@ -4,7 +4,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
 import requests
-from api.models import Department, Staff, SystemSetting, Visit, NotificationLog
+from api.models import Department, Staff, SystemSetting, Visit
 from django.utils import timezone
 from django.shortcuts import redirect
 from django.http import JsonResponse

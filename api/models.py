@@ -124,18 +124,3 @@ class SystemSetting(models.Model):
         verbose_name = "システム設定"
         verbose_name_plural = "システム設定"
 
-
-# class NotificationLog(models.Model):
-#     visit = models.ForeignKey(Visit, on_delete=models.CASCADE, related_name="notifications", verbose_name="来訪")
-#     staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, verbose_name="担当者")
-#     notification_type = models.CharField(max_length=50, verbose_name="通知タイプ")
-#     escalation_level = models.IntegerField(default=0, verbose_name="エスカレーションレベル")
-#     sent_at = models.DateTimeField(auto_now_add=True, verbose_name="送信日時")
-
-#     def __str__(self):
-#         staff_name = self.staff.name if self.staff else "N/A"
-#         return f"{self.visit.visitor_name}への通知 ({staff_name}) - {self.notification_type}"
-
-#     class Meta:
-#         verbose_name = "通知ログ"
-#         verbose_name_plural = "通知ログ"
