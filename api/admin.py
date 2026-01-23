@@ -154,20 +154,20 @@ class SystemSettingAdmin(admin.ModelAdmin):
         }),
     )
 
-# -------------------
-# NotificationLog Admin
-# -------------------
-class NotificationLogAdmin(admin.ModelAdmin):
-    list_display = ('visit_info', 'staff_name', 'notification_type', 'escalation_level', 'sent_at')
-    list_filter = ('notification_type', 'escalation_level', 'staff')
+# # -------------------
+# # NotificationLog Admin
+# # -------------------
+# class NotificationLogAdmin(admin.ModelAdmin):
+#     list_display = ('visit_info', 'staff_name', 'notification_type', 'escalation_level', 'sent_at')
+#     list_filter = ('notification_type', 'escalation_level', 'staff')
 
-    def visit_info(self, obj):
-        return f'{obj.visit.visitor_name}({obj.visit.visitor_company})'
-    visit_info.short_description = '来訪情報'
+#     def visit_info(self, obj):
+#         return f'{obj.visit.visitor_name}({obj.visit.visitor_company})'
+#     visit_info.short_description = '来訪情報'
 
-    def staff_name(self, obj):
-        return obj.staff.name if obj.staff else ''
-    staff_name.short_description = '担当者'
+#     def staff_name(self, obj):
+#         return obj.staff.name if obj.staff else ''
+#     staff_name.short_description = '担当者'
 
 # -------------------
 # Register Models

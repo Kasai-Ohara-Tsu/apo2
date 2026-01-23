@@ -10,7 +10,7 @@ router.register(r"departments", views.DepartmentViewSet)
 router.register(r"staff", views.StaffViewSet)
 router.register(r"visits", views.VisitViewSet)
 router.register(r"settings", views.SystemSettingViewSet)
-router.register(r"notificationlogs", views.NotificationLogViewSet)
+# router.register(r"notificationlogs", views.NotificationLogViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
