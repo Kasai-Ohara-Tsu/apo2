@@ -35,8 +35,7 @@ class Staff(models.Model):
     position = models.CharField(max_length=100, blank=True, verbose_name="役職")
     email = models.EmailField(blank=True, verbose_name="メール")
     phone = models.CharField(max_length=20, blank=True, verbose_name="電話番号")
-    photo_url = models.ImageField(upload_to='media/staff_photos/',blank=True, null=True,verbose_name="写真")
-
+    photo_url = models.ImageField(upload_to='static/staff_photos/', blank=True, null=True, verbose_name="写真")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新日時")
 

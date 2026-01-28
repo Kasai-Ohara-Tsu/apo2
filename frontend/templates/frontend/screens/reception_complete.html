@@ -15,11 +15,31 @@
     <p class="lead mb-4 text-color">一階ロビーでお待ちください。</p>
     {% endif %}
 
-    <a href="{% url 'frontend:index' %}"
+    <a href="{% url 'frontend:index' %}" id="finish-btn"
         class="btn btn-primary-custom btn-large d-flex align-items-center justify-content-center mx-auto text-color"
         style="max-width: 300px;">
         完了
     </a>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Djangoの変数を安全に取得（数値として認識させる）
+        const timeoutMillis = Number("{{ redirect_timeout_ms|default:120000 }}");
+        const redirectUrl = "{% url 'frontend:index' %}";
+
+        // 自動遷移の実行
+        const timer = setTimeout(function () {
+            window.location.href = redirectUrl;
+        }, timeoutMillis);
+
+        // ボタンが押されたらタイマーをキャンセル
+        const btn = document.getElementById('finish-btn');
+        if (btn) {
+            btn.addEventListener('click', function () {
+                clearTimeout(timer);
+            });
+        }
+    });
+</script>
 {% endblock %}

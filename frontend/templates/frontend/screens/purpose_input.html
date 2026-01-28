@@ -21,22 +21,21 @@
 
 
         <!-- ラジオボタングリッド (カード形式) -->
-        <!-- ラジオボタングリッド（3列に固定） -->
-        <div class="d-grid gap-3 justify-content-center" style="
-        grid-template-columns: repeat(3, minmax(220px, 1fr));
+        <!-- ラジオボタングリッド（3列固定） -->
+        <div class="d-flex flex-wrap justify-content-center gap-3" style="
         max-width: 900px;
-        margin: 0 auto;
-        justify-items: center;">
+        margin: 0 auto;">
             {% for purpose in purposes %}
-            <input class="purpose-radio-input" type="radio" name="purpose" id="purpose{{ forloop.counter }}"
-                value="{{ purpose }}">
-            <label class="purpose-radio-label card shadow-sm p-4 text-center" for="purpose{{ forloop.counter }}"
-                style="cursor:pointer; width:100%;">
-                <span class="fw-bold">{{ purpose }}</span>
-            </label>
+            <div style="flex: 0 1 calc(33.333% - 1rem); min-width: 220px; max-width: 280px;">
+                <input class="purpose-radio-input" type="radio" name="purpose" id="purpose{{ forloop.counter }}"
+                    value="{{ purpose }}">
+                <label class="purpose-radio-label card shadow-sm p-4 text-center" for="purpose{{ forloop.counter }}"
+                    style="cursor:pointer; width:100%; height: 100%;">
+                    <span class="fw-bold">{{ purpose }}</span>
+                </label>
+            </div>
             {% endfor %}
         </div>
-
 
 
         <!-- その他入力 -->
