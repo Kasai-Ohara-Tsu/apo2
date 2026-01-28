@@ -22,9 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #     os.path.join(BASE_DIR, "frontend", "static"),  # frontend アプリの static
 # ]
 
-
-MEDIA_URL = '/static/' 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_URL = '/static/media/' 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static', 'media')
 
 
 # Quick-start development settings - unsuitable for production
