@@ -14,6 +14,13 @@ class Department(models.Model):
     parent = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="children", verbose_name="親部署"
     )
+    teams_api_url = models.URLField(
+        max_length=500, 
+        blank=True, 
+        null=True, 
+        verbose_name="Teams API URL",
+        help_text="この部署に通知を飛ばすTeamsチャネルのAPI URLを入力してください"
+    )
     order = models.IntegerField(default=0, verbose_name="表示順")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新日時")

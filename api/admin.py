@@ -10,12 +10,31 @@ from django.db.models.functions import Coalesce
 # -------------------
 # Department Admin
 # -------------------
-class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('name','id', 'department_type', 'order')
-    list_display_links = ('name',)
-    list_filter = ('department_type',)
-    search_fields = ('name','id')
+# admin.py
 
+class DepartmentAdmin(admin.ModelAdmin):
+    # 一覧に表示する項目（teams_api_url を追加）
+    list_display = ('name', 'id', 'department_type', 'order', 'teams_api_status')
+    
+    # クリックして詳細画面へ飛べる項目
+    list_display_links = ('name',)
+    
+    # 右側のフィルターパネル
+    list_filter = ('department_type',)
+    
+    # 検索ボックス（URLの一部でも検索可能に）
+    search_fields = ('name', 'id', 'teams_api_url')
+
+    # 表示順
+    ordering = ('order', 'id')
+
+    # 一覧画面で連携状態をアイコン表示するカスタムメソッド
+    def teams_api_status(self, obj):
+        if obj.teams_api_url:
+            return format_html('<span style="color: green;">✅ 設定済み</span>')
+        return format_html('<span style="color: gray;">❌ 未設定</span>')
+    
+    teams_api_status.short_description = "Teams連携"
 # -------------------
 # Staff Resource for ImportExport
 # -------------------
