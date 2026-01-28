@@ -1,17 +1,19 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.db.models import Q
-from .models import Department, Staff, Visit, SystemSetting
-from .serializers import DepartmentSerializer, StaffSerializer, VisitSerializer, SystemSettingSerializer
 import pandas as pd
+import requests
+import json
 from io import StringIO
+
+from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
-from api.models import Staff # モデルをapiアプリからインポート
-import requests
-import json
+
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from .models import Department, Staff, Visit, SystemSetting
+from .serializers import DepartmentSerializer, StaffSerializer, VisitSerializer, SystemSettingSerializer
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all().order_by("order", "name")
@@ -19,7 +21,7 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def hierarchy(self, request):
-        # ルート部署（親がNoneの部署）を取得
+        """ルート部署（親がNoneの部署）から階層構造を取得"""
         root_departments = Department.objects.filter(parent__isnull=True).order_by("order", "name")
         serializer = self.get_serializer(root_departments, many=True)
         return Response(serializer.data)
@@ -30,9 +32,9 @@ class StaffViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def search(self, request):
+        """名前、カナ、社員番号によるスタッフ検索"""
         query = request.query_params.get("q", "")
         department_id = request.query_params.get("department", None)
-
         staff = Staff.objects.all()
 
         if query:
@@ -49,24 +51,20 @@ class StaffViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"])
     def import_csv(self, request):
+        """CSVによるスタッフ一括登録"""
         if "file" not in request.FILES:
             return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
         
         csv_file = request.FILES["file"]
-        if not csv_file.name.endswith(".csv"):
-            return Response({"error": "File is not a CSV"}, status=status.HTTP_400_BAD_REQUEST)
-
-        data = csv_file.read().decode("utf-8-sig") # BOM付きUTF-8対応
+        data = csv_file.read().decode("utf-8-sig")
         df = pd.read_csv(StringIO(data))
 
         errors = []
         for index, row in df.iterrows():
             try:
                 department, _ = Department.objects.get_or_create(name=row["部署名"], defaults={
-                    "department_type": "section" # デフォルトで課とするか、適切なロジックが必要
+                    "department_type": "section"
                 })
-
-
                 Staff.objects.update_or_create(
                     employee_number=row["社員番号"],
                     defaults={
@@ -87,75 +85,71 @@ class StaffViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def export_csv(self, request):
+        """スタッフ一覧のCSV出力"""
         staff_data = Staff.objects.all().values(
             "employee_number", "name", "name_kana", "department__name", 
-            "position", "email", "phone", "substitute1__employee_number", "substitute2__employee_number"
+            "position", "email", "phone"
         )
         df = pd.DataFrame(list(staff_data))
-        df.rename(columns={
-            "department__name": "部署名",
-            "substitute1__employee_number": "代理人1社員番号",
-            "substitute2__employee_number": "代理人2社員番号",
-        }, inplace=True)
-        
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = "attachment; filename=\"staff_export.csv\""
+        response["Content-Disposition"] = 'attachment; filename="staff_export.csv"'
         df.to_csv(response, index=False, encoding="utf-8-sig")
         return response
-
-def perform_create(self, serializer):
-        # 来客レコードを保存
-        visit = serializer.save()
-        
-        # 担当スタッフの部署に Teams API URL が設定されていれば通知
-        if visit.staff and visit.staff.department and visit.staff.department.teams_api_url:
-            self.send_teams_notification(visit)
-
-def send_teams_notification(self, visit):
-        webhook_url = visit.staff.department.teams_api_url
-        
-        # Teams用のメッセージカード（Adaptive Cards形式なども可）
-        payload = {
-            "type": "message",
-            "attachments": [
-                {
-                    "contentType": "application/vnd.microsoft.card.adaptive",
-                    "content": {
-                        "type": "AdaptiveCard",
-                        "body": [
-                            {"type": "TextBlock", "text": "🔔 来客のお知らせ", "weight": "Bolder", "size": "Medium"},
-                            {"type": "TextBlock", "text": f"担当の {visit.staff.name} さん、来客です。"},
-                            {"type": "FactSet", "facts": [
-                                {"title": "会社名:", "value": visit.visitor_company},
-                                {"title": "お名前:", "value": visit.visitor_name},
-                                {"title": "用件:", "value": visit.purpose_preset or visit.purpose_custom}
-                            ]}
-                        ],
-                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                        "version": "1.0"
-                    }
-                }
-            ]
-        }
-
-        try:
-            response = requests.post(
-                webhook_url, 
-                data=json.dumps(payload),
-                headers={'Content-Type': 'application/json'},
-                timeout=5
-            )
-            response.raise_for_status()
-        except Exception as e:
-            # ログ出力など（実運用では重要）
-            print(f"Teams通知失敗: {e}")
 
 class VisitViewSet(viewsets.ModelViewSet):
     queryset = Visit.objects.all().order_by("-visited_at")
     serializer_class = VisitSerializer
 
+    def perform_create(self, serializer):
+        """データ保存時に自動でTeamsへ通知"""
+        # 1. データベースに保存
+        visit = serializer.save()
+        
+        # 2. 担当者の部署にTeams API URLがあるかチェック
+        if visit.staff and visit.staff.department and visit.staff.department.teams_api_url:
+            self.send_teams_notification(visit, visit.staff.department.teams_api_url)
+
+    def send_teams_notification(self, visit, webhook_url):
+        """TeamsチャネルへAdaptive Card形式で通知を投稿"""
+        local_time = timezone.localtime(visit.visited_at).strftime('%H:%M')
+        
+        payload = {
+            "type": "message",
+            "attachments": [{
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                    "type": "AdaptiveCard",
+                    "version": "1.4",
+                    "body": [
+                        {"type": "TextBlock", "text": "🔔 来客通知", "weight": "Bolder", "size": "Large", "color": "Attention"},
+                        {"type": "TextBlock", "text": f"担当: **{visit.staff.name}** さん", "wrap": True},
+                        {"type": "FactSet", "facts": [
+                            {"title": "会社名:", "value": visit.visitor_company},
+                            {"title": "お客様:", "value": f"{visit.visitor_name} 様"},
+                            {"title": "用件:", "value": visit.purpose_preset or visit.purpose_custom or "なし"},
+                            {"title": "到着:", "value": local_time}
+                        ]}
+                    ],
+                    "actions": [
+                        {
+                            "type": "Action.OpenUrl",
+                            "title": "管理画面を表示",
+                            "url": f"http://localhost:8000/admin/api/visit/{visit.id}/change/"
+                        }
+                    ],
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+                }
+            }]
+        }
+
+        try:
+            # タイムアウトを短めに設定してユーザーを待たせない
+            requests.post(webhook_url, json=payload, timeout=5)
+        except Exception as e:
+            print(f"Teams Notification Failed: {e}")
     @action(detail=True, methods=["post"])
     def respond(self, request, pk=None):
+        """担当者からの応答（受諾・拒否）を処理"""
         visit = self.get_object()
         response_status = request.data.get("response")
         response_message = request.data.get("message", "")
@@ -170,85 +164,33 @@ class VisitViewSet(viewsets.ModelViewSet):
         visit.response_message = response_message
         visit.response_time = timezone.now()
         visit.save()
-    def perform_create(self, serializer):
-        visit = serializer.save()
-        # 保存後に通知を実行
-        send_teams_notification(visit)
-        
-        # WebSocket通知 (受付端末更新用)
-        # from channels.layers import get_channel_layer
-        # from asgiref.sync import async_to_sync
-        # channel_layer = get_channel_layer()
-        # async_to_sync(channel_layer.group_send)(
-        #     "reception",
-        #     {
-        #         "type": "visit_status_update",
-        #         "visit_id": visit.id,
-        #         "status": visit.status,
-        #         "response_message": visit.response_message,
-        #     }
-        # )
-
-        serializer = self.get_serializer(visit)
-        return Response(serializer.data)
+        return Response(self.get_serializer(visit).data)
 
     @action(detail=True, methods=["post"])
     def escalate(self, request, pk=None):
+        """代理人へのエスカレーション処理"""
         visit = self.get_object()
         current_level = visit.escalation_level
         next_staff = None
-        notification_type = "escalation_notification"
-        escalated_to_name = ""
 
         if current_level == 0 and visit.staff and visit.staff.substitute1:
             next_staff = visit.staff.substitute1
             visit.escalation_level = 1
-            escalated_to_name = next_staff.name
         elif current_level == 1 and visit.staff and visit.staff.substitute2:
             next_staff = visit.staff.substitute2
             visit.escalation_level = 2
-            escalated_to_name = next_staff.name
         elif current_level == 2:
             visit.escalation_level = 3
-            # 総務への通知ロジック (メール送信など) は別途実装
-            # general_affairs_email = SystemSetting.get_setting("general_affairs_email")
-            # if general_affairs_email:
-            #     send_mail(
-            #         "来客エスカレーション通知",
-            #         f"来客 {visit.visitor_name} ({visit.visitor_company}) が総務へエスカレーションされました。",
-            #         "from@example.com",
-            #         [general_affairs_email],
-            #         fail_silently=False,
-            #     )
-            return Response({"escalated_to": "general_affairs", "message": "総務へエスカレーションしました"})
+            return Response({"escalated_to": "general_affairs", "message": "総務へ転送しました"})
         else:
-            return Response({"error": "Escalation not possible at this level or no next substitute"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "No substitute available"}, status=status.HTTP_400_BAD_REQUEST)
 
         visit.save()
-
-        # WebSocket通知 (担当者通知用)
-        # from channels.layers import get_channel_layer
-        # from asgiref.sync import async_to_sync
-        # channel_layer = get_channel_layer()
-        # async_to_sync(channel_layer.group_send)(
-        #     f"staff_{next_staff.id}",
-        #     {
-        #         "type": "escalation_notification",
-        #         "visit_id": visit.id,
-        #         "visitor_company": visit.visitor_company,
-        #         "visitor_name": visit.visitor_name,
-        #         "escalation_level": visit.escalation_level,
-        #         "original_staff": visit.staff.name if visit.staff else "N/A",
-        #     }
-        # )
-
-        return Response({"escalated_to": next_staff.id, "escalated_to_name": escalated_to_name, "escalation_level": visit.escalation_level})
-
-    @action(detail=False, methods=["get"])
-    def statistics(self, request):
-        days = int(request.query_params.get("days", 7))
-        # 統計情報のロジックは別途実装
-        return Response({"message": f"{days}日間の統計情報を返します"})
+        return Response({
+            "escalated_to": next_staff.id, 
+            "escalated_to_name": next_staff.name, 
+            "level": visit.escalation_level
+        })
 
 class SystemSettingViewSet(viewsets.ModelViewSet):
     queryset = SystemSetting.objects.all()
@@ -258,33 +200,6 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
     def get_setting(self, request):
         key = request.query_params.get("key")
         if not key:
-            return Response({"error": "Key parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response({"error": "Key is required"}, status=status.HTTP_400_BAD_REQUEST)
         value = SystemSetting.get_setting(key)
-        if value is None:
-            return Response({"error": "Setting not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response({"key": key, "value": value})
-
-    @action(detail=False, methods=["post"])
-    def set_setting(self, request):
-        key = request.data.get("key")
-        value = request.data.get("value")
-        description = request.data.get("description", "")
-
-        if not key or not value:
-            return Response({"error": "Key and value parameters are required"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        setting, _ = SystemSetting.objects.update_or_create(
-            key=key,
-            defaults={
-                "value": value,
-                "description": description
-            }
-        )
-        serializer = self.get_serializer(setting)
-        return Response(serializer.data)
-
-# class NotificationLogViewSet(viewsets.ModelViewSet):
-#     queryset = NotificationLog.objects.all().order_by("-sent_at")
-#     serializer_class = NotificationLogSerializer
-

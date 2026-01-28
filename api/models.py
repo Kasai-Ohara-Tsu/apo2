@@ -64,7 +64,6 @@ class Visit(models.Model):
     STATUS_CHOICES = [
         ("waiting", "担当者応答待ち"),
         ("manager", "担当者対応"),
-        ("escalated", "エスカレーション済み"),
         ("notified", "総務部対応"),
     ]
 
