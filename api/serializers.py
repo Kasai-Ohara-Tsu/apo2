@@ -17,6 +17,14 @@ class StaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = Staff
         fields = '__all__'
+    teams_api_url = serializers.CharField(source='department.teams_api_url', read_only=True)
+
+    class Meta:
+        model = Staff
+        fields = [
+            'id', 'employee_number', 'name', 'name_kana', 
+            'department', 'position', 'photo_url', 'teams_api_url'
+        ]
 
 class VisitSerializer(serializers.ModelSerializer):
     staff_name = serializers.CharField(source='staff.name', read_only=True)

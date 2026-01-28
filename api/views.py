@@ -10,6 +10,8 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from api.models import Staff # モデルをapiアプリからインポート
+import requests
+import json
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all().order_by("order", "name")
@@ -101,6 +103,52 @@ class StaffViewSet(viewsets.ModelViewSet):
         df.to_csv(response, index=False, encoding="utf-8-sig")
         return response
 
+def perform_create(self, serializer):
+        # 来客レコードを保存
+        visit = serializer.save()
+        
+        # 担当スタッフの部署に Teams API URL が設定されていれば通知
+        if visit.staff and visit.staff.department and visit.staff.department.teams_api_url:
+            self.send_teams_notification(visit)
+
+def send_teams_notification(self, visit):
+        webhook_url = visit.staff.department.teams_api_url
+        
+        # Teams用のメッセージカード（Adaptive Cards形式なども可）
+        payload = {
+            "type": "message",
+            "attachments": [
+                {
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "content": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {"type": "TextBlock", "text": "🔔 来客のお知らせ", "weight": "Bolder", "size": "Medium"},
+                            {"type": "TextBlock", "text": f"担当の {visit.staff.name} さん、来客です。"},
+                            {"type": "FactSet", "facts": [
+                                {"title": "会社名:", "value": visit.visitor_company},
+                                {"title": "お名前:", "value": visit.visitor_name},
+                                {"title": "用件:", "value": visit.purpose_preset or visit.purpose_custom}
+                            ]}
+                        ],
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                        "version": "1.0"
+                    }
+                }
+            ]
+        }
+
+        try:
+            response = requests.post(
+                webhook_url, 
+                data=json.dumps(payload),
+                headers={'Content-Type': 'application/json'},
+                timeout=5
+            )
+            response.raise_for_status()
+        except Exception as e:
+            # ログ出力など（実運用では重要）
+            print(f"Teams通知失敗: {e}")
 
 class VisitViewSet(viewsets.ModelViewSet):
     queryset = Visit.objects.all().order_by("-visited_at")
@@ -122,6 +170,10 @@ class VisitViewSet(viewsets.ModelViewSet):
         visit.response_message = response_message
         visit.response_time = timezone.now()
         visit.save()
+    def perform_create(self, serializer):
+        visit = serializer.save()
+        # 保存後に通知を実行
+        send_teams_notification(visit)
         
         # WebSocket通知 (受付端末更新用)
         # from channels.layers import get_channel_layer
@@ -173,12 +225,6 @@ class VisitViewSet(viewsets.ModelViewSet):
             return Response({"error": "Escalation not possible at this level or no next substitute"}, status=status.HTTP_400_BAD_REQUEST)
 
         visit.save()
-        NotificationLog.objects.create(
-            visit=visit,
-            staff=next_staff,
-            notification_type=notification_type,
-            escalation_level=visit.escalation_level
-        )
 
         # WebSocket通知 (担当者通知用)
         # from channels.layers import get_channel_layer
