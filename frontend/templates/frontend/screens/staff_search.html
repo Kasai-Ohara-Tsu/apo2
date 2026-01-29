@@ -19,17 +19,19 @@
         style="max-height: calc(100vh - 150px); overflow-y: auto; display: block;">
         <div class="border rounded p-3">
             {% if departments_data %}
-            <!-- 本部タブ横の部署リスト -->
-            <div class="d-flex flex-wrap gap-3 justify-content-center mb-4">
-                {% for dept in departments_data %}
-                <div class="department-item border rounded p-3 text-center shadow-sm {% if forloop.first %}active-dept{% endif %}"
-                    style="min-width:160px; cursor:pointer;" data-dept-id="{{ dept.id }}"
-                    onclick="showDepartmentStaff({{ dept.id }})">
-                    <span class="fw-bold fs-5 text-color">{{ dept.name }}</span>
+            <div class="d-flex justify-content-center mb-4">
+                <div style="width: 100%; max-width: 500px;">
+                    <label for="dept-select" class="form-label fw-bold">部署を選択してください</label>
+                    <select id="dept-select" class="form-select form-select-lg shadow-sm"
+                        onchange="showDepartmentStaff(this.value)">
+                        {% for dept in departments_data %}
+                        <option value="{{ dept.id }}" {% if forloop.first %}selected{% endif %}>
+                            {{ dept.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
-                {% endfor %}
             </div>
-
             <!-- 各本部・課ごとの社員リスト -->
             {% for dept in departments_data %}
             <div class="department-staff" id="dept-{{ dept.id }}"
@@ -397,26 +399,18 @@
 
 
     function showDepartmentStaff(deptId) {
-        // 1. すべてのスタッフリストを非表示にする
+        // 1. すべてのスタッフリスト（各部署のコンテナ）を非表示にする
         document.querySelectorAll('.department-staff').forEach(el => {
             el.style.display = 'none';
         });
 
-        // 2. 選択されたスタッフリストを表示する
+        // 2. 選択された部署ID（deptId）に一致するリストを表示する
         const selectedDept = document.getElementById(`dept-${deptId}`);
         if (selectedDept) {
             selectedDept.style.display = 'block';
-        }
 
-        // 3. すべてのボタンからアクティブクラスを削除
-        document.querySelectorAll('.department-item').forEach(el => {
-            el.classList.remove('active-dept');
-        });
-
-        // 4. クリックされたボタンにアクティブクラスを付与
-        const clickedButton = document.querySelector(`.department-item[data-dept-id="${deptId}"]`);
-        if (clickedButton) {
-            clickedButton.classList.add('active-dept');
+            // ページ上部にスクロールさせる（リストが長い場合の利便性）
+            selectedDept.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
 </script>
