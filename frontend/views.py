@@ -406,6 +406,39 @@ def waiting(request):
         "escalation_seconds": escalation_seconds,
     })
 
+def cancel_from_waiting(request):
+    """
+    waiting2画面からのキャンセル時、セッションに保存された情報をstaff_search2画面へ引き継いでリダイレクトする
+    また、キャンセルされた訪問のVisitレコードを削除する。
+    """
+    # セッションから情報を取得
+    visit_id = request.session.get("visit_id")
+    visitor_name = request.session.get("visitor_name", "")
+    visitor_company = request.session.get("visitor_company", "")
+    purpose_preset = request.session.get("purpose_preset", "")
+    purpose_custom = request.session.get("purpose_custom", "")
+    visit_type = request.session.get("visit_type", "appointment")
+
+    if visit_id:
+        Visit.objects.filter(id=visit_id).delete()
+    
+    request.session.pop("visit_id", None)
+
+    params = {
+        "visitor_name": visitor_name,
+        "visitor_company": visitor_company,
+        "purpose_preset": purpose_preset,
+        "purpose_custom": purpose_custom,
+        "visit_type": visit_type
+    }
+    
+    from django.urls import reverse
+    from urllib.parse import urlencode
+
+    base_url = reverse('frontend:staff_search')
+    query_string = urlencode(params)
+
+    return redirect(f"{base_url}?{query_string}")
 
 
 

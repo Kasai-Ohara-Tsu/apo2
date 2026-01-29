@@ -14,6 +14,7 @@ urlpatterns = [
     path('reception-complete/', views.reception_complete, name='reception_complete'),
     path('notification-complete/', views.notification_complete, name='notification_complete'),
     path('which/', views.which, name='which'),
+    path('cancel_from_waiting', views.cancel_from_waiting, name='cancel_from_waiting'),
     path('cancel_from_waiting2', views.cancel_from_waiting2, name='cancel_from_waiting2'),
 
     # path('notification/', views.notification, name='notification'),
