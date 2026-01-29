@@ -51,7 +51,7 @@ class StaffResource(resources.ModelResource):
  
         fields = (
             'employee_number', 'name', 'name_kana',
-            'department', 'position', 'email', 'phone',
+            'department', 'position',
             'photo_url'
         )
 
