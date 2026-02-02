@@ -5,7 +5,6 @@ class Department(models.Model):
     DEPARTMENT_TYPES = [
         ("headquarters", "本部"),
         ("section", "本部直下"),
-        ("special", "例外部門"),
     ]
     
     name = models.CharField(max_length=100, verbose_name="部署名")

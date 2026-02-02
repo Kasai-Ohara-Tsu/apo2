@@ -77,14 +77,21 @@ class StaffAdmin(ImportExportModelAdmin):
     list_filter = ('department',)
     ordering = ('department__order', 'name')
     inlines = [VisitInline]
-    readonly_fields = ('photo_preview',)
+    readonly_fields = ('head_department', 'section_name')
 
     fieldsets = (
         ('基本情報', {
-            'fields': ('employee_number', 'name', 'name_kana', 'head_department','section_name', )
+            'fields': (
+                'employee_number', 
+                'name', 
+                'name_kana', 
+                'department', 
+                'head_department',
+                'section_name',
+            )
         }),
         ('写真', {
-            'fields': ('photo_url',) 
+            'fields': ('photo_url', ) 
         }),
     )
 
