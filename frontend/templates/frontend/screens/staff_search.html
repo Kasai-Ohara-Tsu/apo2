@@ -32,6 +32,7 @@
                     </select>
                 </div>
             </div>
+
             <!-- 各本部・課ごとの社員リスト -->
             {% for dept in departments_data %}
             <div class="department-staff" id="dept-{{ dept.id }}"
@@ -378,9 +379,8 @@
     }
 
     function selectStaff(id, name) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const company = urlParams.get('visitor_company') || localStorage.getItem('visitor_company') || '';
-        const visitor = urlParams.get('visitor_name') || localStorage.getItem('visitor_name') || '';
+        const company = localStorage.getItem('visitor_company') || '';
+        const visitor = localStorage.getItem('visitor_name') || '';
         const url = "{% url 'frontend:waiting' %}";
         const purpose_preset = new URLSearchParams(window.location.search).get('purpose_preset') || '';
         const purpose_custom = new URLSearchParams(window.location.search).get('purpose_custom') || '';
@@ -397,7 +397,6 @@
         window.location.href = `${url}?${p.toString()}`;
     }
 
-
     function showDepartmentStaff(deptId) {
         // 1. すべてのスタッフリスト（各部署のコンテナ）を非表示にする
         document.querySelectorAll('.department-staff').forEach(el => {
@@ -413,5 +412,6 @@
             selectedDept.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
+
 </script>
 {% endblock %}

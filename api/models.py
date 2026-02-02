@@ -4,8 +4,7 @@ from django.utils import timezone
 class Department(models.Model):
     DEPARTMENT_TYPES = [
         ("headquarters", "本部"),
-        ("department", "部"),
-        ("section", "課"),
+        ("section", "本部直下"),
         ("special", "例外部門"),
     ]
     
