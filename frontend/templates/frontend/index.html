@@ -6,15 +6,15 @@
 <div class="container-wide">
     <div class="text-center mb-5">
         <h1 class="display-4 m-4" style="color: var(--navy); font-size: 7.5rem; font-weight: bold;">RECEPTION</h1>
-        <h4 class="lead" style="color: var(--black); font-size: 2rem; font-weight: bold;">来訪目的を選択してください</h4>
+        <h4 class="lead" style="color: var(--black); font-size: 1.7rem;">来訪目的を選択してください</h4>
     </div>
 
     <div class="d-flex justify-content-center gap-4 flex-wrap button-container">
         <a href="{% url 'frontend:visitor_info' %}?visit_type=appointment"
-            class="btn choice-btn tall-btn btn-appointment">アポイントあり</a>
+            class="btn choice-btn tall-btn btn-appointment" style="font-size: 2rem;">アポイントあり</a>
 
         <a href="{% url 'frontend:visitor_info' %}?visit_type=no-appointment"
-            class="btn choice-btn tall-btn btn-no-appointment">アポイントなし(要件入力)</a>
+            class="btn choice-btn tall-btn btn-no-appointment" style="font-size: 2rem;">アポイントなし</a>
     </div>
 </div>
 {% endblock %}
