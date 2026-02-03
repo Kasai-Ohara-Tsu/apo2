@@ -11,15 +11,97 @@
     <link rel="shortcut icon" href="/static/staff_photos/favi2.svg">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bellefair&family=Poiret+One&family=Cinzel:wght@400;600;900&display=swap"
+        rel="stylesheet">
 
     <style>
         /*********************
-        基本設定
+        基本設定 - アールデコ
         *********************/
-        body {
-            background-color: #ffffff;
-            font-family: "Hiragino Kaku Gothic ProN", "メイリオ", Meiryo, sans-serif;
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #b8941e;
+            --emerald: #10b981;
+            --emerald-dark: #047857;
+            --navy: #1e3a5f;
+            --cream: #faf8f0;
+            --black: #1a1a1a;
+            --white: #f5f5f5;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poiret One', cursive;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 50%, #1e3a5f 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* アールデコ背景パターン */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(212, 175, 55, 0.03) 50px,
+                    rgba(212, 175, 55, 0.03) 100px),
+                repeating-linear-gradient(-45deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(16, 185, 129, 0.03) 50px,
+                    rgba(16, 185, 129, 0.03) 100px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 幾何学オーナメント */
+        .geometric-ornament {
+            position: fixed;
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .ornament-1 {
+            top: 10%;
+            left: 5%;
+            width: 200px;
+            height: 200px;
+            border: 3px solid var(--gold);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation: rotate 30s linear infinite;
+        }
+
+        .ornament-2 {
+            bottom: 10%;
+            right: 5%;
+            width: 150px;
+            height: 150px;
+            border: 3px solid var(--emerald);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: rotate 25s linear infinite reverse;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .main-content {
@@ -29,122 +111,200 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            position: relative;
+            z-index: 10;
         }
 
         .container-wide {
-            max-width: 56rem;
+            max-width: 60rem;
             width: 100%;
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(250, 248, 240, 0.95), rgba(250, 248, 240, 0.98));
+            clip-path: polygon(0 40px,
+                    40px 0,
+                    calc(100% - 40px) 0,
+                    100% 40px,
+                    100% calc(100% - 40px),
+                    calc(100% - 40px) 100%,
+                    40px 100%,
+                    0 calc(100% - 40px));
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.3),
+                inset 0 0 0 2px var(--gold);
+            animation: containerEnter 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+        }
+
+        @keyframes containerEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .text-color {
-            color: #ffffff;
-            /* #333333; */
+            color: var(--navy);
         }
 
         button {
             -webkit-tap-highlight-color: transparent;
         }
 
-
         footer.footer {
-            /* background-color: #e0e0e0; */
-            background-color: #004540;
+            background: var(--navy);
+            color: var(--gold);
             padding: 1rem 2rem;
             text-align: center;
-            /* color: #333333; */
-            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+            font-family: 'Poiret One', cursive;
+            letter-spacing: 0.2em;
         }
 
         /*********************
         部署カード・社員カード
         *********************/
         .department-item {
-            background-color: #00736c;
-            transition: all 0.2s;
+            background: white;
+            border: 3px solid var(--gold);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--navy);
+            padding: 1.5rem;
+            letter-spacing: 0.1em;
+            clip-path: polygon(0 10px,
+                    10px 0,
+                    calc(100% - 10px) 0,
+                    100% 10px,
+                    100% calc(100% - 10px),
+                    calc(100% - 10px) 100%,
+                    10px 100%,
+                    0 calc(100% - 10px));
         }
 
         .department-item:hover {
-            background-color: #001d1b;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: var(--gold);
+            color: var(--cream);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
         }
 
         .department-item.active-dept {
-            background-color: #001d1b;
-            border-color: #fff;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: var(--cream);
+            border-color: var(--emerald);
             transform: translateY(-8px);
-            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+            box-shadow: 0 20px 50px rgba(16, 185, 129, 0.4);
         }
 
         .staff-card-clickable {
-            transition: all 0.2s;
+            transition: all 0.4s;
             cursor: pointer;
-            border-radius: 10px;
-            color: #000000;
-            padding-left: 10px;
-            padding-right: 10px;
+            color: var(--navy);
         }
 
-
-
-        /* --------------------------
-                社員カード全般
-        -------------------------- */
+        /* 社員カード全般 */
         .staff-card {
             display: flex;
             flex-direction: column;
             width: 200px;
-            /* デスクトップ基準 */
             cursor: pointer;
-            border-radius: 0.75rem;
             overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             text-align: center;
+            border: 3px solid var(--gold);
+            background: white;
+            position: relative;
+            clip-path: polygon(0 15px,
+                    15px 0,
+                    calc(100% - 15px) 0,
+                    100% 15px,
+                    100% calc(100% - 15px),
+                    calc(100% - 15px) 100%,
+                    15px 100%,
+                    0 calc(100% - 15px));
+        }
+
+        .staff-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+            transition: left 0.6s;
+            z-index: 1;
+        }
+
+        .staff-card:hover::before {
+            left: 100%;
         }
 
         .staff-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-12px);
+            border-color: var(--emerald);
+            box-shadow: 0 20px 50px rgba(16, 185, 129, 0.3);
         }
 
         /* 画像部分 */
         .staff-photo-top {
             width: 100%;
             aspect-ratio: 1 / 0.9;
-            /* 幅に対して高さを少し短め */
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: #f0f0f0;
+            position: relative;
         }
 
         .staff-photo-top img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* 中央をトリミングしてカードに収める */
             display: block;
         }
 
         .staff-name-marked mark {
-            background: #ffe58a;
-            padding: 0 0.12rem;
-            border-radius: 0.12rem;
+            background: var(--gold);
+            padding: 0 0.3rem;
+            font-weight: 600;
+            color: var(--cream);
         }
-
 
         .card-staff {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            /* X方向, Y方向, ぼかし, 色 */
-            border-radius: 0.75rem;
-            /* 任意で角丸 */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border: 3px solid var(--gold);
+            transition: all 0.4s;
+            clip-path: polygon(0 10px,
+                    10px 0,
+                    calc(100% - 10px) 0,
+                    100% 10px,
+                    100% calc(100% - 10px),
+                    calc(100% - 10px) 100%,
+                    10px 100%,
+                    0 calc(100% - 10px));
         }
 
-
         .card-staff:hover {
-            background-color: #F9F1C0;
+            background-color: var(--gold);
+            color: var(--cream);
+            transform: translateY(-6px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
         }
 
         /*********************
@@ -158,15 +318,31 @@
         .search-result-container {
             max-height: calc(60vh - 160px);
             overflow-y: auto;
-            background-color: #f8f9fa;
-            border-radius: 20px;
+            background-color: white;
+            border: 3px solid var(--gold);
+            clip-path: polygon(0 15px,
+                    15px 0,
+                    calc(100% - 15px) 0,
+                    100% 15px,
+                    100% calc(100% - 15px),
+                    calc(100% - 15px) 100%,
+                    15px 100%,
+                    0 calc(100% - 15px));
         }
 
         #department-tab {
             max-height: calc(100vh - 200px);
             overflow-y: auto;
-            background-color: #f8f9fa;
-            border-radius: 20px;
+            background-color: white;
+            border: 3px solid var(--gold);
+            clip-path: polygon(0 15px,
+                    15px 0,
+                    calc(100% - 15px) 0,
+                    100% 15px,
+                    100% calc(100% - 15px),
+                    calc(100% - 15px) 100%,
+                    15px 100%,
+                    0 calc(100% - 15px));
         }
 
         /*********************
@@ -175,135 +351,266 @@
         .btn-large {
             min-height: 6rem;
             font-size: 1.5rem;
-            border-radius: .75rem;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: none;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            clip-path: polygon(0 20px,
+                    20px 0,
+                    calc(100% - 20px) 0,
+                    100% 20px,
+                    100% calc(100% - 20px),
+                    calc(100% - 20px) 100%,
+                    20px 100%,
+                    0 calc(100% - 20px));
         }
 
         .input-large {
             height: 4rem;
             font-size: 1.25rem;
-            padding: .75rem 1.5rem;
-            border-radius: .75rem;
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--gold);
+            background: white;
+            font-family: 'Poiret One', cursive;
+            transition: all 0.3s;
+            color: var(--navy);
+            clip-path: polygon(0 10px,
+                    10px 0,
+                    calc(100% - 10px) 0,
+                    100% 10px,
+                    100% calc(100% - 10px),
+                    calc(100% - 10px) 100%,
+                    10px 100%,
+                    0 calc(100% - 10px));
+        }
+
+        .input-large:focus {
+            outline: none;
+            border-color: var(--emerald);
+            box-shadow:
+                0 0 20px rgba(16, 185, 129, 0.3),
+                inset 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .input-large::placeholder {
+            color: rgba(30, 58, 95, 0.4);
         }
 
         .label-large {
-            font-size: 1.25rem;
-            font-weight: 500;
-            margin-bottom: .5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-family: 'Cinzel', serif;
+            color: var(--emerald-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
         }
 
         .tall-btn {
+            font-family: 'Cinzel', serif;
             font-size: 1.6rem;
             height: 220px;
-            border-radius: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             flex: 1 1 0;
             max-width: 48%;
-            transition: transform .2s;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: var(--cream) !important;
+            border: none;
+            clip-path: polygon(0 20px,
+                    20px 0,
+                    calc(100% - 20px) 0,
+                    100% 20px,
+                    100% calc(100% - 20px),
+                    calc(100% - 20px) 100%,
+                    20px 100%,
+                    0 calc(100% - 20px));
+            overflow: hidden;
+            position: relative;
+            text-transform: uppercase;
+            text-decoration: none;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            box-shadow:
+                0 10px 30px rgba(16, 185, 129, 0.3),
+                inset 0 0 0 2px rgba(212, 175, 55, 0.5);
+        }
+
+        .tall-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.5), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+            border-radius: 50%;
+            z-index: 0;
+            /* ← この行を追加 */
+        }
+
+        /* 文字を前面に配置 */
+        .tall-btn span,
+        .tall-btn {
+            position: relative;
+            z-index: 1;
+            /* ← ボタンのテキストを前面に */
+        }
+
+        .tall-btn:hover::before {
+            width: 400px;
+            height: 400px;
         }
 
         .tall-btn:hover {
-            transform: scale(1.05);
+            transform: translateY(-10px);
+            box-shadow:
+                0 20px 50px rgba(16, 185, 129, 0.4),
+                inset 0 0 0 3px var(--gold);
         }
 
         @media (max-width: 768px) {
             .tall-btn {
                 max-width: 100%;
+                height: 180px;
+                font-size: 1.3rem;
             }
         }
 
         .btn-primary-custom {
-            background: #176dee;
-            border-color: #176dee;
-            color: #fff;
-            color: #fff !important;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            border: none;
+            color: var(--cream) !important;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.4s;
+            box-shadow:
+                0 8px 24px rgba(16, 185, 129, 0.3),
+                inset 0 0 0 2px rgba(212, 175, 55, 0.3);
         }
 
         .btn-primary-custom:hover {
-            background: #125fd8;
+            background: var(--gold);
+            color: var(--cream) !important;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(212, 175, 55, 0.4);
         }
 
         .btn-secondary-custom {
-            background: #e5e7eb;
-            border-color: #e5e7eb;
-            color: #1f2937;
-            color: #1f2937 !important;
+            background: white;
+            border: 3px solid var(--gold);
+            color: var(--navy) !important;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.4s;
         }
 
         .btn-secondary-custom:hover {
-            background: #d1d5db;
+            background: var(--gold);
+            color: var(--cream) !important;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(212, 175, 55, 0.4);
         }
 
         .btn-success-custom {
-            background: #16a34a;
-            border-color: #16a34a;
-            color: #fff;
+            background: var(--gold);
+            border: none;
+            color: var(--cream);
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: all 0.4s;
         }
 
         .btn-success-custom:hover {
-            background: #15803d;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
         }
 
         .btn-primary-custom2 {
-            background: #2563eb;
-            border-color: #ffffff;
-            border: 2px solid #ffffff;
-            color: #fff;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            border: none;
+            color: var(--cream);
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            letter-spacing: 0.1em;
         }
 
         .btn-primary-custom2:hover {
-            background: #1d4ed8;
+            background: var(--gold);
+            color: var(--cream);
         }
 
         .btn-success-custom2 {
-            background: #198754;
-            border-color: #ffffff;
-            border: 2px solid #ffffff;
-            color: #fff;
+            background: var(--gold);
+            border: none;
+            color: var(--cream);
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            letter-spacing: 0.1em;
         }
 
         .btn-success-custom2:hover {
-            background: #157347;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
         }
 
         .choice-btn {
             min-width: 180px;
             padding: 1.6rem 2.5rem;
-            border-radius: 1.2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border: none;
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-family: 'Cinzel', serif;
+            border: 3px solid var(--gold);
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            color: #000 !important;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            color: var(--navy) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: white;
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+        }
+
+        .choice-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gold);
+            transition: left 0.5s;
+            z-index: 0;
+        }
+
+        .choice-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .choice-btn:hover::before {
+            left: 0;
         }
 
         .choice-btn:hover {
+            color: var(--cream) !important;
             transform: translateY(-6px);
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
-            opacity: 0.95;
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
         }
 
-        /* 各ボタン色 */
-        .choice-btn:nth-child(3) {
-            background-color: #FFD166;
-            /* サンイエロー */
-        }
-
-        .choice-btn:nth-child(1) {
-            background-color: #FF9AA2;
-            /* コーラルピンク */
-            color: #ffffff;
-        }
-
-        .choice-btn:nth-child(2) {
-            background-color: #8EDCE6;
-            /* アクアブルー */
-        }
-
-        /* ラジオボタンを非表示にする */
+        /* ラジオボタン */
         .purpose-radio-input {
             position: absolute;
             opacity: 0;
@@ -311,33 +618,35 @@
             height: 0;
         }
 
-        /* ラベル（カード）の基本スタイル */
         .purpose-radio-label {
-            font-size: 1.1rem;
+            font-size: 1rem;
+            font-family: 'Poiret One', cursive;
+            font-weight: 600;
             cursor: pointer;
-            border: 2px solid #dee2e6;
-            /* Bootstrap border-color */
-            transition: all 0.2s ease-in-out;
+            border: 2px solid var(--gold);
+            transition: all 0.3s ease-in-out;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 40px;
+            background: white;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--navy);
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
         }
 
-        /* ホバー時のスタイル */
         .purpose-radio-label:hover {
-            border-color: #007bff;
-            /* Primary color */
+            border-color: var(--emerald);
+            background: var(--gold);
+            color: var(--cream);
         }
 
-        /* 選択時のスタイル */
         .purpose-radio-input:checked+.purpose-radio-label {
-            border-color: #007bff;
-            /* Primary color */
-            background-color: #e9f5ff;
-            /* Light blue background */
-            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
-            /* Focus ring effect */
+            border-color: var(--emerald);
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: var(--cream);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
         }
 
         /* スマホ対応 */
@@ -349,14 +658,49 @@
 
             .choice-btn {
                 width: 80%;
-                font-size: 1.3rem;
+                font-size: 1.2rem;
                 padding: 1.2rem;
             }
         }
 
+        /*********************
+        タブ
+        *********************/
+        .nav-tabs {
+            border: none;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .nav-tabs .nav-link {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: white;
+            border: 2px solid var(--gold);
+            color: var(--navy);
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+            transition: all 0.3s;
+            letter-spacing: 0.1em;
+            padding: 1rem 2.5rem;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: var(--cream);
+            border-color: var(--emerald);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+        }
+
+        .nav-tabs .nav-link:not(.active):hover {
+            border-color: var(--gold);
+            background: var(--gold);
+            color: var(--cream);
+        }
 
         /*********************
-        ▼▼▼ ここからレスポンシブ強化 ▼▼▼
+        レスポンシブ
         *********************/
         @media (max-width: 1200px) {
             .main-content {
@@ -384,7 +728,7 @@
 
             .department-item {
                 margin-bottom: 0.75rem;
-                font-size: 1.1rem;
+                font-size: 1rem;
                 text-align: center;
             }
 
@@ -407,9 +751,15 @@
                 aspect-ratio: 1 / 1;
             }
 
-            .tall-btn {
-                height: 180px;
-                font-size: 1.3rem;
+            .container-wide {
+                clip-path: polygon(0 30px,
+                        30px 0,
+                        calc(100% - 30px) 0,
+                        100% 30px,
+                        100% calc(100% - 30px),
+                        calc(100% - 30px) 100%,
+                        30px 100%,
+                        0 calc(100% - 30px));
             }
         }
 
@@ -420,6 +770,14 @@
 
             .container-wide {
                 width: 95%;
+                clip-path: polygon(0 20px,
+                        20px 0,
+                        calc(100% - 20px) 0,
+                        100% 20px,
+                        100% calc(100% - 20px),
+                        calc(100% - 20px) 100%,
+                        20px 100%,
+                        0 calc(100% - 20px));
             }
 
             .staff-card {
@@ -436,25 +794,74 @@
                 font-size: 0.8rem;
                 padding: 0.5rem;
             }
-
-            body {
-                background-position: center center;
-                background-size: cover;
-            }
         }
 
         /*********************
-        ▲▲▲ レスポンシブ強化ここまで ▲▲▲
+        追加のアールデコエフェクト
         *********************/
+        .deco-element {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            border: 3px solid var(--gold);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            position: relative;
+            animation: gemShine 3s ease-in-out infinite;
+        }
+
+        .deco-element::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: var(--emerald);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        @keyframes gemShine {
+
+            0%,
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+                filter: brightness(1.2);
+            }
+        }
+
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--cream);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 0;
+            border: 2px solid var(--cream);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--emerald);
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 
-<body style="background-image: url('/static/images/7.png'); 
-             background-size: cover; 
-             background-position: center 10%;
-             background-attachment: fixed;">
+<body>
+    <!-- 幾何学オーナメント -->
+    <div class="geometric-ornament ornament-1"></div>
+    <div class="geometric-ornament ornament-2"></div>
 
     <main class="main-content">
         {% block content %}{% endblock %}
@@ -475,7 +882,7 @@
             }
 
             function adjustTabHeight() {
-                const offset = 160; // ヘッダー＋タブボタン＋余白
+                const offset = 160;
 
                 const deptTab = document.getElementById('department-tab');
                 if (deptTab) {
@@ -491,7 +898,6 @@
                     nameTab.style.webkitOverflowScrolling = 'touch';
                 }
 
-                // 検索結果コンテナもスクロール可能に
                 const searchContainer = document.querySelector('.search-result-container');
                 if (searchContainer) {
                     searchContainer.style.maxHeight = (window.innerHeight - offset - 80) + 'px';
