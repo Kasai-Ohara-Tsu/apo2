@@ -66,6 +66,58 @@
             z-index: 0;
         }
 
+        /* 日時表示 */
+        .datetime-display {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, rgba(250, 248, 240, 0.95), rgba(250, 248, 240, 0.98));
+            border: 2px solid var(--gold);
+            padding: 1rem 1.5rem;
+            z-index: 1000;
+            clip-path: polygon(0 10px, 10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px));
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        #current-datetime {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--navy);
+            letter-spacing: 0.05em;
+            line-height: 1.6;
+        }
+
+        .datetime-date {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .datetime-time {
+            font-size: 1.4rem;
+            color: var(--emerald-dark);
+        }
+
+        @media (max-width: 768px) {
+            .datetime-display {
+                top: 10px;
+                left: 10px;
+                padding: 0.6rem 1rem;
+            }
+
+            #current-datetime {
+                font-size: 0.9rem;
+            }
+
+            .datetime-date {
+                font-size: 1rem;
+            }
+
+            .datetime-time {
+                font-size: 1.1rem;
+            }
+        }
+
         /* 幾何学オーナメント */
         .geometric-ornament {
             position: fixed;
@@ -873,6 +925,11 @@
     <div class="geometric-ornament ornament-1"></div>
     <div class="geometric-ornament ornament-2"></div>
 
+    <!-- 日時表示 -->
+    <div class="datetime-display">
+        <div id="current-datetime"></div>
+    </div>
+
     <main class="main-content">
         {% block content %}{% endblock %}
     </main>
@@ -884,6 +941,32 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // 日時の更新関数
+            function updateDateTime() {
+                const now = new Date();
+                const dateTimeElem = document.getElementById('current-datetime');
+
+                if (dateTimeElem) {
+                    const month = now.getMonth() + 1;
+                    const day = now.getDate();
+                    const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+                    const weekday = weekdays[now.getDay()];
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+                    dateTimeElem.innerHTML = `
+                        <div class="datetime-date">${month}月${day}日(${weekday})</div>
+                        <div class="datetime-time">${hours}:${minutes}</div>
+                    `;
+                }
+            }
+
+            // 初回実行
+            updateDateTime();
+
+            // 1秒ごとに更新
+            setInterval(updateDateTime, 1000);
+
             const dateElem = document.getElementById('current-date');
             if (dateElem) {
                 dateElem.textContent = new Date().toLocaleDateString('ja-JP', {
