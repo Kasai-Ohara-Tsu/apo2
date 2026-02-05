@@ -669,33 +669,8 @@ def reception_complete(request):
     # 1. 担当者情報を取得
     staff = Staff.objects.filter(id=staff_id).first() if staff_id and staff_id.isdigit() else None
 
-    # ★ 2. 通知先URLを動的に決定する（ここが重要！）
-    notification_url = None
-    if staff and staff.department and staff.department.teams_api_url:
-        # 担当者がいて、その所属部署にURLが設定されている場合
-        notification_url = staff.department.teams_api_url
-        print(f">>> 部署専用URLを使用します: {staff.department.name}")
-    else:
-        # 設定がない場合は、これまでの「本部」URLを予備として使う
-        notification_url = AZURE_LOGIC_APP_URL_honbu
-        print(">>> 部署URL未設定のため本部URLを使用します")
-
-    # ★ 修正ポイント2: staff 取得後に通知データを作成する ★
-    teams_data = {
-        "title": "【新規来客】",
-        "participant": visitor_name,
-        "company": visitor_company,
-        "staff_name": staff.name if staff else "担当者",
-        "date": timezone.now().strftime('%Y/%m/%d %H:%M'),
-        "message": f"{visitor_company} の {visitor_name} 様がお見えです。ご対応をお願いします。"
-    }
-
-    # 3. 決定したURLに対して送信
-    try:
-        res = requests.post(notification_url, json=teams_data) # 変数 notification_url を使う
-        print(f">>> 通知完了: {res.status_code}")
-    except Exception as e:
-        print(f">>> 通知エラー: {e}")
+    # ★ 通知は既にwaiting画面で送信済みなので、ここでは送らない ★
+    # （待機→受付完了の遷移時に重複通知を防ぐため）
 
     # 既存 Visit
     visit_id = request.session.get("visit_id")
@@ -910,18 +885,12 @@ def handle_form_submission(request):
                 visit.responded_at = timezone.now()
                 visit.save()
             
-            # 元の部署にメッセージを送る
-            requests.post(original_dept_url, json={
-                "title": "🟢【対応中】",
-                "participant": visitor_name,
-                "company": visitor_company,
-                "staff_name": staff.name if staff else "担当者",
-                "message": f"✅ 担当者が向かっています。メッセージ: {custom_message}"
-            })
+            # Teams通知は不要（来訪者の画面が自動遷移するだけ）
+            print(f">>> 対応可能：Visitステータスを更新しました（{visitor_name}様分）")
             
             # 社員側には簡潔な完了メッセージを表示
             return render(request, "frontend/screens/staff_response_complete.html", {
-                "message": "対応可能の通知を送信しました。来訪者の画面が更新されます。"
+                "message": "対応可能を送信しました。来訪者の画面が更新されます。"
             })
 
     return redirect('frontend:index')
