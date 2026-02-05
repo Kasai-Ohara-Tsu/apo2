@@ -19,9 +19,7 @@
         <input type="hidden" name="purpose_preset" id="purpose_preset">
         <input type="hidden" name="purpose_custom" id="purpose_custom">
 
-
-        <!-- ラジオボタングリッド (カード形式) -->
-        <!-- ラジオボタングリッド（3列固定） -->
+        <!-- 用件選択肢 -->
         <div class="d-flex flex-wrap justify-content-center gap-3" style="
         max-width: 900px;
         margin: 0 auto;">
@@ -36,7 +34,6 @@
             </div>
             {% endfor %}
         </div>
-
 
         <!-- その他入力 -->
         <div class="mb-4 mt-3">
@@ -76,15 +73,15 @@
 
         // 自由入力時
         customInput.addEventListener('input', function () {
-            customField.value = this.value.trim(); // 自由入力を hidden に
+            customField.value = this.value.trim();
 
-            // ボタン有効化条件：ラジオか自由入力のどちらかに値がある場合
+            // ラジオか自由入力のどちらかに値がある場合
             const selectedRadio = document.querySelector('.purpose-radio-input:checked');
             submitBtn.disabled = !(this.value.trim() || (selectedRadio && selectedRadio.value));
         });
 
 
-        // フォーム submit
+        // フォーム 
         form.addEventListener('submit', function (e) {
             const selectedRadio = document.querySelector('.purpose-radio-input:checked');
             const customText = customInput.value.trim();
@@ -99,14 +96,14 @@
             localStorage.setItem("purpose_preset", presetField.value);
             localStorage.setItem("purpose_custom", customField.value);
 
-            // フォームはそのまま which へ送信される
+            // フォームはそのまま which へ送信
         });
 
-        // 初期化処理: 戻るボタンで戻ってきた場合の復元
+        // 戻るボタンで戻ってきた場合の復元
         const initialPreset = localStorage.getItem("purpose_preset");
         const initialCustom = localStorage.getItem("purpose_custom");
 
-        // 初期化処理: 戻るボタンで戻ってきた場合の復元
+        // 戻るボタンで戻ってきた場合の復元
         // 両方とも復元できるようにロジックを変更
         if (initialPreset) {
             const radio = document.querySelector(`.purpose-radio-input[value="${initialPreset}"]`);

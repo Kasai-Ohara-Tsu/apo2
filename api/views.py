@@ -2,18 +2,16 @@ import pandas as pd
 import requests
 import json
 from io import StringIO
-
 from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
-
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from .models import Department, Staff, Visit, SystemSetting
 from .serializers import DepartmentSerializer, StaffSerializer, VisitSerializer, SystemSettingSerializer
+
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all().order_by("order", "name")
@@ -25,6 +23,7 @@ class DepartmentViewSet(viewsets.ModelViewSet):
         root_departments = Department.objects.filter(parent__isnull=True).order_by("order", "name")
         serializer = self.get_serializer(root_departments, many=True)
         return Response(serializer.data)
+    
 
 class StaffViewSet(viewsets.ModelViewSet):
     queryset = Staff.objects.all().order_by("employee_number")
@@ -96,16 +95,14 @@ class StaffViewSet(viewsets.ModelViewSet):
         df.to_csv(response, index=False, encoding="utf-8-sig")
         return response
 
+
 class VisitViewSet(viewsets.ModelViewSet):
     queryset = Visit.objects.all().order_by("-visited_at")
     serializer_class = VisitSerializer
 
     def perform_create(self, serializer):
-        """データ保存時に自動でTeamsへ通知"""
-        # 1. データベースに保存
         visit = serializer.save()
-        
-        # 2. 担当者の部署にTeams API URLがあるかチェック
+
         if visit.staff and visit.staff.department and visit.staff.department.teams_api_url:
             self.send_teams_notification(visit, visit.staff.department.teams_api_url)
 
@@ -143,13 +140,11 @@ class VisitViewSet(viewsets.ModelViewSet):
         }
 
         try:
-            # タイムアウトを短めに設定してユーザーを待たせない
             requests.post(webhook_url, json=payload, timeout=5)
         except Exception as e:
             print(f"Teams Notification Failed: {e}")
     @action(detail=True, methods=["post"])
     def respond(self, request, pk=None):
-        """担当者からの応答（受諾・拒否）を処理"""
         visit = self.get_object()
         response_status = request.data.get("response")
         response_message = request.data.get("message", "")
@@ -168,7 +163,6 @@ class VisitViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def escalate(self, request, pk=None):
-        """代理人へのエスカレーション処理"""
         visit = self.get_object()
         current_level = visit.escalation_level
         next_staff = None
@@ -191,6 +185,7 @@ class VisitViewSet(viewsets.ModelViewSet):
             "escalated_to_name": next_staff.name, 
             "level": visit.escalation_level
         })
+    
 
 class SystemSettingViewSet(viewsets.ModelViewSet):
     queryset = SystemSetting.objects.all()

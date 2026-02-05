@@ -10,21 +10,15 @@ from django.db.models.functions import Coalesce
 # -------------------
 # Department Admin
 # -------------------
-# admin.py
-
 class DepartmentAdmin(admin.ModelAdmin):
-    # 一覧に表示する項目（teams_api_url を追加）
+    # 一覧に表示する項目
     list_display = ('name', 'id', 'department_type', 'order', 'teams_api_status')
-    
-    # クリックして詳細画面へ飛べる項目
+    # クリックして詳細画面へ
     list_display_links = ('name',)
-    
     # 右側のフィルターパネル
     list_filter = ('department_type',)
-    
     # 検索ボックス（URLの一部でも検索可能に）
     search_fields = ('name', 'id', 'teams_api_url')
-
     # 表示順
     ordering = ('order', 'id')
     # ★ 修正ポイント：インデントをクラス内に合わせ、format_html を正しく使います
@@ -53,7 +47,7 @@ class StaffResource(resources.ModelResource):
  
         fields = (
             'employee_number', 'name', 'name_kana',
-            'department', 'position', 'email', 'phone',
+            'department', 'position',
             'photo_url'
         )
 
@@ -80,24 +74,31 @@ class StaffAdmin(ImportExportModelAdmin):
         'name', 
         'head_department',  
         'section_name',  
-        'position',
+
     )
     search_fields = ('name', 'employee_number', 'name_kana', 'department__name', 'section_name')
     list_filter = ('department',)
     ordering = ('department__order', 'name')
     inlines = [VisitInline]
-    readonly_fields = ('photo_preview',)
+    readonly_fields = ('head_department', 'section_name')
 
     fieldsets = (
         ('基本情報', {
-            'fields': ('employee_number', 'name', 'name_kana', 'department', 'position')
+            'fields': (
+                'employee_number', 
+                'name', 
+                'name_kana', 
+                'department', 
+                'head_department',
+                'section_name',
+            )
         }),
-        ('連絡先', {
-            'fields': ('email', 'phone', 'photo_url') 
+        ('写真', {
+            'fields': ('photo_url', ) 
         }),
     )
 
-
+#ソート対応
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.annotate(
@@ -121,7 +122,7 @@ class StaffAdmin(ImportExportModelAdmin):
     def section_name(self, obj):
         parent = getattr(obj.department, 'parent', None) if obj.department else None
         return obj.department.name if parent else "-"
-    section_name.short_description = "課"
+    section_name.short_description = "部署名"
     section_name.admin_order_field = 'section_name_value'
 
     def photo_preview(self, obj):
@@ -176,25 +177,9 @@ class SystemSettingAdmin(admin.ModelAdmin):
         }),
     )
 
-# # -------------------
-# # NotificationLog Admin
-# # -------------------
-# class NotificationLogAdmin(admin.ModelAdmin):
-#     list_display = ('visit_info', 'staff_name', 'notification_type', 'escalation_level', 'sent_at')
-#     list_filter = ('notification_type', 'escalation_level', 'staff')
-
-#     def visit_info(self, obj):
-#         return f'{obj.visit.visitor_name}({obj.visit.visitor_company})'
-#     visit_info.short_description = '来訪情報'
-
-#     def staff_name(self, obj):
-#         return obj.staff.name if obj.staff else ''
-#     staff_name.short_description = '担当者'
-
 # -------------------
 # Register Models
 # -------------------
 admin.site.register(Department, DepartmentAdmin)
 admin.site.register(Staff, StaffAdmin)
 admin.site.register(Visit, VisitAdmin)
-# admin.site.register(NotificationLog, NotificationLogAdmin)

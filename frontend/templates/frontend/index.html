@@ -2,21 +2,35 @@
 
 {% block title %}来客受付システム - タプコ{% endblock %}
 
+{% block extra_css %}
+
+{% endblock %}
+
 {% block content %}
 <div class="container-wide">
+    <!-- フローティング装飾 -->
+    <div class="floating-ornament"></div>
+    <div class="floating-ornament"></div>
+    <div class="floating-ornament"></div>
+
     <div class="text-center mb-5">
-        <h1 class="display-4 mb-4 text-color">ようこそ大原学園へ</h1>
-        <h4 class="lead text-color">来訪目的を選択してください</h4>
+        <h1 class="display-4 m-4 welcome-title">ようこそ大原学園へ</h1>
+
+        <h4 class="lead subtitle-decorated">ご訪問の種類をお選びください</h4>
     </div>
 
     <div class="d-flex justify-content-center gap-4 flex-wrap button-container">
-        <a href="{% url 'frontend:visitor_info' %}?visit_type=appointment" class="btn choice-btn tall-btn">
-            📅 アポイントあり
-        </a>
+        <!-- コーナー装飾 -->
+        <div class="corner-decoration top-left"></div>
+        <div class="corner-decoration top-right"></div>
+        <div class="corner-decoration bottom-left"></div>
+        <div class="corner-decoration bottom-right"></div>
 
-        <a href="{% url 'frontend:visitor_info' %}?visit_type=no-appointment" class="btn choice-btn tall-btn">
-            🚶 アポイントなし(要件入力)
-        </a>
+        <a href="{% url 'frontend:visitor_info' %}?visit_type=appointment"
+            class="btn choice-btn tall-btn btn-appointment" style="font-size: 2rem;">アポイントあり</a>
+
+        <a href="{% url 'frontend:visitor_info' %}?visit_type=no-appointment"
+            class="btn choice-btn tall-btn btn-no-appointment" style="font-size: 2rem;">アポイントなし</a>
     </div>
 </div>
 {% endblock %}

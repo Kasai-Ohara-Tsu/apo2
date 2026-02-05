@@ -38,11 +38,3 @@ class SystemSettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = SystemSetting
         fields = '__all__'
-
-# class NotificationLogSerializer(serializers.ModelSerializer):
-#     staff_name = serializers.CharField(source='staff.name', read_only=True)
-#     visit_visitor_name = serializers.CharField(source='visit.visitor_name', read_only=True)
-
-#     class Meta:
-#         model = NotificationLog
-#         fields = '__all__'
