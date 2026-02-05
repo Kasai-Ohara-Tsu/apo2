@@ -45,6 +45,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         startTimer();
         setupRespondButton();
+        startStatusPolling();  // ステータスポーリング開始
     });
 
     function startTimer() {
@@ -79,8 +80,6 @@
         if (el) el.textContent = `${timeLeft}秒`;
     }
 
-
-
     // 対応完了
     function setupRespondButton() {
         const btn = document.getElementById("respond-btn");
@@ -88,6 +87,9 @@
 
         btn.addEventListener("click", function () {
             clearInterval(window.mainTimer);
+            if (window.statusPollingInterval) {
+                clearInterval(window.statusPollingInterval);
+            }
 
             const params = new URLSearchParams({
                 staff_id: "{{ staff.id }}",
@@ -103,7 +105,66 @@
         });
     }
 
-
+    // ★ 新機能：社員の対応状況をポーリング ★
+    function startStatusPolling() {
+        const staffId = "{{ staff.id }}";
+        const visitorName = "{{ visitor_name|escapejs }}";
+        const visitorCompany = "{{ visitor_company|escapejs }}";
+        
+        // 5秒ごとにステータスをチェック
+        const pollingInterval = setInterval(function() {
+            fetch(`{% url 'frontend:check_visit_status' %}?staff_id=${staffId}&visitor_name=${encodeURIComponent(visitorName)}&visitor_company=${encodeURIComponent(visitorCompany)}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Visit status:', data.status);
+                    
+                    // ステータスが「manager」(対応可能)になったら受付完了画面へ遷移
+                    if (data.status === 'manager') {
+                        clearInterval(pollingInterval);
+                        clearInterval(window.mainTimer);
+                        
+                        const params = new URLSearchParams({
+                            staff_id: staffId,
+                            visitor_name: visitorName,
+                            visitor_company: visitorCompany,
+                            visit_type: visitType,
+                            status: "manager",
+                            purpose_preset: purposePreset,
+                            purpose_custom: purposeCustom
+                        });
+                        
+                        window.location.href = `{% url 'frontend:reception_complete' %}?` + params.toString();
+                    }
+                    // ステータスが「notified」(対応不可)になったら通知完了画面へ遷移
+                    else if (data.status === 'notified') {
+                        clearInterval(pollingInterval);
+                        clearInterval(window.mainTimer);
+                        
+                        const params = new URLSearchParams({
+                            staff_id: staffId,
+                            visitor_name: visitorName,
+                            visitor_company: visitorCompany,
+                            visit_type: visitType,
+                            status: "notified",
+                            purpose_preset: purposePreset,
+                            purpose_custom: purposeCustom
+                        });
+                        
+                        window.location.href = `{% url 'frontend:notification_complete' %}?` + params.toString();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking visit status:', error);
+                });
+        }, 5000); // 5秒ごと
+        
+        window.statusPollingInterval = pollingInterval;
+        
+        // ページを離れる時にインターバルをクリア
+        window.addEventListener('beforeunload', function() {
+            clearInterval(pollingInterval);
+        });
+    }
 </script>
 
 {% endblock %}

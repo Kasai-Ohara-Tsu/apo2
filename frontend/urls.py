@@ -23,9 +23,14 @@ urlpatterns = [
     # path('collection/', views.collection, name='collection'),
     # path('courier/', views.courier, name='courier'),
 
+    path('handle_form_submission/', views.handle_form_submission, name='handle_form_submission'),
+    path('response-form/', views.show_response_form, name='show_response_form'),
+
+
     # API endpoints
     path('api/departments/', views.get_departments, name='get_departments'),
     path('api/staff/', views.get_staff, name='get_staff'),
     path('api/notify-staff/', views.notify_staff, name='notify_staff'),
+    path('api/check-visit-status/', views.check_visit_status, name='check_visit_status'),
 ]
 

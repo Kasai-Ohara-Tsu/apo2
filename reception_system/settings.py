@@ -42,10 +42,13 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'tap-connect.onrender.com',
     '.onrender.com',
+    # ngrokのドメインを許可リストに追加します
+    'laminable-jaxon-supermodestly.ngrok-free.dev', 'localhost', '127.0.0.1'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://tap-connect.onrender.com',
+    'https://laminable-jaxon-supermodestly.ngrok-free.dev', # ←ここにも追加
 ]
 
 
