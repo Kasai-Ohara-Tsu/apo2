@@ -27,14 +27,16 @@ class DepartmentAdmin(admin.ModelAdmin):
 
     # 表示順
     ordering = ('order', 'id')
-
-    # 一覧画面で連携状態をアイコン表示するカスタムメソッド
+    # ★ 修正ポイント：インデントをクラス内に合わせ、format_html を正しく使います
     def teams_api_status(self, obj):
         if obj.teams_api_url:
-            return format_html('<span style="color: green;">✅ 設定済み</span>')
-        return format_html('<span style="color: gray;">❌ 未設定</span>')
+            # 第一引数の文字列内の {} に、第二引数以降の値を流し込みます
+            return format_html('<span style="color: green;">{}</span>', "✅ 設定済み")
+        return format_html('<span style="color: gray;">{}</span>', "❌ 未設定")
     
+    # メソッドの説明ラベル
     teams_api_status.short_description = "Teams連携"
+    
 # -------------------
 # Staff Resource for ImportExport
 # -------------------
@@ -124,7 +126,8 @@ class StaffAdmin(ImportExportModelAdmin):
 
     def photo_preview(self, obj):
         if obj.photo_url:
-            return format_html('<img src="{}" style="height:100px;border-radius:8px;">', obj.photo_url.url)
+            # url 属性を直接文字列として渡すように修正します
+            return format_html('<img src="{}" style="height:100px;border-radius:8px;">', obj.photo_url)
         return "画像なし"
     photo_preview.short_description = "写真プレビュー"
 
