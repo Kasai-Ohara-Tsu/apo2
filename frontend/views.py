@@ -467,39 +467,6 @@ def waiting(request):
         "escalation_seconds": escalation_seconds,
     })
 
-def cancel_from_waiting(request):
-    """
-    waiting2画面からのキャンセル時、セッションに保存された情報をstaff_search2画面へ引き継いでリダイレクトする
-    また、キャンセルされた訪問のVisitレコードを削除する。
-    """
-    # セッションから情報を取得
-    visit_id = request.session.get("visit_id")
-    visitor_name = request.session.get("visitor_name", "")
-    visitor_company = request.session.get("visitor_company", "")
-    purpose_preset = request.session.get("purpose_preset", "")
-    purpose_custom = request.session.get("purpose_custom", "")
-    visit_type = request.session.get("visit_type", "appointment")
-
-    if visit_id:
-        Visit.objects.filter(id=visit_id).delete()
-    
-    request.session.pop("visit_id", None)
-
-    params = {
-        "visitor_name": visitor_name,
-        "visitor_company": visitor_company,
-        "purpose_preset": purpose_preset,
-        "purpose_custom": purpose_custom,
-        "visit_type": visit_type
-    }
-    
-    from django.urls import reverse
-    from urllib.parse import urlencode
-
-    base_url = reverse('frontend:staff_search')
-    query_string = urlencode(params)
-
-    return redirect(f"{base_url}?{query_string}")
 
 
 
@@ -698,6 +665,7 @@ def reception_complete(request):
     purpose_preset = request.GET.get("purpose_preset")
     purpose_custom = request.GET.get("purpose_custom")
     status_param = request.GET.get("status")
+    response_message = request.GET.get("response_message", "")  # メッセージを取得
     
     # 1. 担当者情報を取得
     staff = Staff.objects.filter(id=staff_id).first() if staff_id and staff_id.isdigit() else None
@@ -756,6 +724,7 @@ def reception_complete(request):
         "staff_name": staff.name if staff else "",
         "staff": staff,
         "visit": visit,
+        "response_message": response_message,  # メッセージをテンプレートに渡す
     })
 
 # 通知画面
@@ -877,6 +846,7 @@ def handle_form_submission(request):
             # notification_complete画面で使われる "notified" ステータスに設定
             if visit:
                 visit.status = "notified"
+                visit.response_message = custom_message  # メッセージを保存
                 visit.responded_at = timezone.now()
                 visit.save()
             
@@ -915,11 +885,12 @@ def handle_form_submission(request):
             # reception_complete画面で使われる "manager" ステータスに設定
             if visit:
                 visit.status = "manager"
+                visit.response_message = custom_message  # メッセージを保存
                 visit.responded_at = timezone.now()
                 visit.save()
             
             # Teams通知は不要（来訪者の画面が自動遷移するだけ）
-            print(f">>> 対応可能：Visitステータスを更新しました（{visitor_name}様分）")
+            print(f">>> 対応可能：Visitステータスを更新しました（{visitor_name}様分）、メッセージ: {custom_message}")
             
             # 社員側には簡潔な完了メッセージを表示
             return render(request, "frontend/screens/staff_response_complete.html", {
@@ -1076,10 +1047,13 @@ def check_visit_status(request):
     if visit:
         return JsonResponse({
             "status": visit.status,
-            "staff_name": staff.name if staff else "担当者"
+            "staff_name": staff.name if staff else "担当者",
+            "response_message": visit.response_message or ""  # メッセージを追加
         })
     else:
         return JsonResponse({
             "status": "waiting",
-            "staff_name": staff.name if staff else "担当者"
+            "staff_name": staff.name if staff else "担当者",
+            "response_message": ""
         })
+        

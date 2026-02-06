@@ -7,11 +7,11 @@
     <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
     <h1 class="mb-3 text-color">受付完了</h1>
 
-    {% if message %}
     <p class="lead mb-4 text-color">{{staff_name}}からのメッセージ: </p>
-    <p class="lead mb-4 text-color">{{ message }}</p>
+    
+    {% if response_message %}
+    <p class="lead mb-4 text-color">{{ response_message }}</p>
     {% else %}
-    <p class="lead mb-4 text-color">{{staff_name}}からのメッセージ: </p>
     <p class="lead mb-4 text-color">一階ロビーでお待ちください。</p>
     {% endif %}
 
@@ -34,7 +34,7 @@
         }, timeoutMillis);
 
         // ボタンが押されたらタイマーをキャンセル
-        const btn = document.getElementById('finish-btn');
+        const btn = document.getElementById('complete-btn');
         if (btn) {
             btn.addEventListener('click', function () {
                 clearTimeout(timer);
