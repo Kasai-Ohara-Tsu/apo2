@@ -94,7 +94,6 @@ class StaffAdmin(ImportExportModelAdmin):
                 'name_kana',
                 'department',
                 'head_department',
-                'section_name',
                 'position',
             )
         }),
