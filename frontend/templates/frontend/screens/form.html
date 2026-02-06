@@ -215,6 +215,28 @@
             color: var(--danger);
         }
 
+        /* メッセージプリセットボタン */
+        .preset-btn {
+            appearance: none;
+            border: 1.5px solid var(--border);
+            background: white;
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: .15s;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--primary);
+            background: color-mix(in srgb, var(--primary) 5%, white);
+        }
+
+        .preset-btn:active {
+            transform: scale(0.98);
+        }
+
         /* 細かなレスポンシブ */
         @media (max-width:420px) {
             .choices {
@@ -254,9 +276,15 @@
 
                 <div class="field">
                     <label for="message" class="label">メッセージ<span class="optional">（任意）</span></label>
-                    <textarea id="message" name="message" placeholder="例：2分ほどで伺います"></textarea>
-                    <!-- エラーや説明を出したい場合
-          <p class="help error">メッセージは200文字以内で入力してください。</p> -->
+                    
+                    <!-- メッセージ選択肢ボタン -->
+                    <div class="message-presets" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <button type="button" class="preset-btn" data-message="1階ロビーでお待ちください">1階ロビーでお待ちください</button>
+                        <button type="button" class="preset-btn" data-message="2分ほどで伺います">2分ほどで伺います</button>
+                        <button type="button" class="preset-btn" data-message="5分ほどお待ちください">5分ほどお待ちください</button>
+                    </div>
+                    
+                    <textarea id="message" name="message" placeholder="選択肢から選ぶか、自由に入力してください"></textarea>
                 </div>
 
                 <div class="actions">
@@ -280,6 +308,18 @@
         }
         radios.forEach(r => r.addEventListener('change', updateState));
         updateState();
+
+        // メッセージプリセットボタンの処理
+        const messageTextarea = document.getElementById('message');
+        const presetButtons = document.querySelectorAll('.preset-btn');
+        
+        presetButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const message = this.getAttribute('data-message');
+                messageTextarea.value = message;
+                messageTextarea.focus();
+            });
+        });
 
         // 既存バリデーションと競合させないため、ここではHTML標準に合わせてそのまま送信
         form.addEventListener('submit', (e) => {
