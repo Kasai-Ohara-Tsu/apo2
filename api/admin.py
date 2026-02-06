@@ -51,6 +51,15 @@ class StaffResource(resources.ModelResource):
             'photo_url'
         )
 
+        export_order = (
+            'employee_number', 
+            'name', 
+            'name_kana',
+            'department', 
+            'position',
+            'photo_url'
+        )
+
 # -------------------
 # Visit Inline
 # -------------------
