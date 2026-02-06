@@ -37,7 +37,7 @@ class Staff(models.Model):
     name = models.CharField(max_length=100, verbose_name="氏名")
     name_kana = models.CharField(max_length=100, blank=True, verbose_name="氏名（カナ）")
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, verbose_name="部署")
-    position = models.CharField(max_length=100, blank=True, verbose_name="役職")
+    position = models.CharField(max_length=100, blank=True, verbose_name="所属・役職")
     photo_url = models.ImageField(upload_to='staff_photos/', blank=True, null=True, verbose_name="写真")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新日時")

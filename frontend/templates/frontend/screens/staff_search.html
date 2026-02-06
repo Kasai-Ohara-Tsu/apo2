@@ -18,36 +18,34 @@
     <div id="department-tab" class="tab-content mb-4"
         style="max-height: calc(100vh - 150px); overflow-y: auto; display: block;">
         <div class="border rounded p-3">
-            {% if headquarters_list %}
+            {% if departments_data %}
             <div class="d-flex justify-content-center mb-4">
                 <div style="width: 100%; max-width: 500px;">
-                    <label for="dept-select" class="form-label fw-bold">本部を選択してください</label>
+                    <label for="dept-select" class="form-label fw-bold">部署を選択してください</label>
                     <select id="dept-select" class="form-select form-select-lg shadow-sm"
                         onchange="showDepartmentStaff(this.value)">
-                        {% for hq in headquarters_list %}
-                        <option value="{{ hq.id }}" {% if forloop.first %}selected{% endif %}>
-                            {{ hq.name }}
+                        {% for dept in departments_data %}
+                        <option value="{{ dept.id }}" {% if forloop.first %}selected{% endif %}>
+                            {{ dept.name }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
 
-            <!-- 各本部ごとの表示 -->
-            {% for hq in headquarters_list %}
-            <div class="department-staff" id="dept-{{ hq.id }}"
+            <!-- 各本部・課ごとの社員リスト -->
+            {% for dept in departments_data %}
+            <div class="department-staff" id="dept-{{ dept.id }}"
                 style="{% if forloop.first %}display:block;{% else %}display:none;{% endif %}">
-                <h5 class="mb-3 fw-bold">{{ hq.name }}</h5>
+                <h5 class="mb-3 fw-bold">{{ dept.name }}</h5>
 
-                <!-- 本部直下の部署とその社員 -->
-                {% if hq.sections %}
-                {% for section in hq.sections %}
-                <h6 class="mt-3 fw-bold">{{ section.name }}</h6>
-                {% if section.staff_list %}
+                <!-- 本部直下社員 -->
+                {% if dept.staff_list %}
                 <div class="department-staff-list d-flex flex-wrap gap-3 justify-content-center mb-3">
-                    {% for staff in section.staff_list %}
+                    {% for staff in dept.staff_list %}
                     <div class="card staff-card shadow-sm text-center" style="width:200px; cursor:pointer;"
                         onclick="selectStaff('{{ staff.id }}','{{ staff.name }}')">
+                        <!-- 上半分に画像 -->
                         <div class="staff-photo-top">
                             {% if staff.photo_url %}
                             <img src="{{ staff.photo_url.url }}" alt="{{ staff.name }}" class="img-top">
@@ -55,6 +53,33 @@
                             <img src="{% static 'images/default.png' %}" alt="デフォルト画像" class="img-top">
                             {% endif %}
                         </div>
+                        <!-- 下半分にテキスト -->
+                        <div class="p-2">
+                            <div class="fw-bold staff-name-marked">{{ staff.name }}</div>
+                            <div class="text-muted small">{{ staff.position }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- 課ごとの社員 -->
+                {% for section in dept.sections %}
+                <h5 class="mt-3 fw-bold">{{ section.full_name }}</h5>
+                {% if section.staff_list %}
+                <div class="department-staff-list d-flex flex-wrap gap-3 justify-content-center mb-3">
+                    {% for staff in section.staff_list %}
+                    <div class="card staff-card shadow-sm text-center" style="width:200px; cursor:pointer;"
+                        onclick="selectStaff('{{ staff.id }}','{{ staff.name }}')">
+                        <!-- 上半分に画像 -->
+                        <div class="staff-photo-top">
+                            {% if staff.photo_url %}
+                            <img src="{{ staff.photo_url.url }}" alt="{{ staff.name }}" class="img-top">
+                            {% else %}
+                            <img src="{% static 'images/default.png' %}" alt="デフォルト画像" class="img-top">
+                            {% endif %}
+                        </div>
+                        <!-- 下半分にテキスト -->
                         <div class="p-2">
                             <div class="fw-bold staff-name-marked">{{ staff.name }}</div>
                             <div class="text-muted small">{{ staff.position }}</div>
@@ -66,14 +91,11 @@
                 <p class="text-muted small">社員はいません</p>
                 {% endif %}
                 {% endfor %}
-                {% else %}
-                <p class="text-muted">部署情報がありません</p>
-                {% endif %}
             </div>
             {% endfor %}
 
             {% else %}
-            <p class="text-muted">本部情報が見つかりません。</p>
+            <p class="text-muted">部署情報が見つかりません。</p>
             {% endif %}
         </div>
     </div>
@@ -186,7 +208,8 @@
                 const c1 = s.substr(i, 1);
                 if (ROMAJI_MAP[c1]) matched = ROMAJI_MAP[c1];
             }
-            if (matched) {
+            if (matched) { // advance by length of matched key
+                // find length
                 if (i + 3 <= s.length && ROMAJI_MAP[s.substr(i, 3)]) { out += ROMAJI_MAP[s.substr(i, 3)]; i += 3; }
                 else if (i + 2 <= s.length && ROMAJI_MAP[s.substr(i, 2)]) { out += ROMAJI_MAP[s.substr(i, 2)]; i += 2; }
                 else { out += ROMAJI_MAP[s.substr(i, 1)]; i += 1; }
@@ -228,13 +251,17 @@
     }
 
     /* ---------- マッチングロジック ---------- */
+    // ルール：キーワードが1文字なら「先頭一致（startsWith）」で検索。2文字以上は部分一致（includes）。
+    // 比較対象は staff の name_kana（DBにあるカナ）をひらがな化したもの。漢字 name もひらがな化して念のため比較。
+
     function isMatchForTerm(itemName, itemKana, rawInput) {
         const termHira = toHiraganaUnified(rawInput);
-        if (!termHira) return true;
+        if (!termHira) return true; // 空検索は表示
 
         const kanaH = toHiraganaUnified(itemKana || "");
         const nameH = toHiraganaUnified(itemName || "");
 
+        // expand variants for 1-char term (濁音→清音など)
         const termsToTry = (termHira.length === 1) ? expandVariantsHira(termHira) : [termHira];
 
         for (const t of termsToTry) {
@@ -244,6 +271,7 @@
                 if (kanaH.includes(t) || nameH.includes(t)) return true;
             }
         }
+        // fallback: raw ascii partial match on original name (for roman-latin mixed)
         const rawClean = simpleClean(rawInput);
         if (rawClean) {
             if ((itemName || "").toLowerCase().indexOf(rawClean) !== -1) return true;
@@ -254,6 +282,7 @@
     /* ---------- UI: フィルター実行 ---------- */
     function filterStaff() {
         const raw = document.getElementById('search-input').value || "";
+        // remove previous no-result
         const prev = document.getElementById('no-result');
         if (prev) prev.remove();
 
@@ -264,14 +293,17 @@
             const kana = item.dataset.kana || "";
             const ok = isMatchForTerm(name, kana, raw);
             item.style.display = ok ? "block" : "none";
+            // highlight if match (simple mark using hira index on nameH)
             const wrap = item.querySelector('.staff-name-marked');
             if (ok) {
                 hit = true;
+                // mark attempt: find index in nameH and map back roughly to original (best-effort)
                 const termHira = toHiraganaUnified(raw);
                 if (termHira) {
                     const nameH = toHiraganaUnified(name);
                     const idx = nameH.indexOf(termHira);
                     if (idx !== -1 && wrap) {
+                        // naive: slice original by char counts (best-effort)
                         const pre = escapeHtml(name.slice(0, idx));
                         const mid = escapeHtml(name.slice(idx, idx + termHira.length));
                         const post = escapeHtml(name.slice(idx + termHira.length));
@@ -297,6 +329,7 @@
 
     /* ---------- DOM イベント設定 ---------- */
     document.addEventListener('DOMContentLoaded', function () {
+        // staff-cardクリックで選択
         document.querySelectorAll('.staff-card-clickable').forEach(card => {
             card.addEventListener('click', function () {
                 selectStaff(this.dataset.staffId, this.dataset.staffName);
@@ -310,10 +343,11 @@
             search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(filterStaff, 120); });
         }
 
+        // 初期は全表示
         filterStaff();
     });
 
-    /* ---------- ユーティリティ関数 ---------- */
+    /* ---------- 既存関数群（テンプレ内にある既存の関数をそのまま利用） ---------- */
     function escapeHtml(str) {
         return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
@@ -334,16 +368,14 @@
         }
     }
 
-    function showDepartmentStaff(deptId) {
-        document.querySelectorAll('.department-staff').forEach(el => {
-            el.style.display = 'none';
-        });
 
-        const selectedDept = document.getElementById(`dept-${deptId}`);
-        if (selectedDept) {
-            selectedDept.style.display = 'block';
-            selectedDept.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    function showDepartmentStaff(deptId) {
+        document.querySelectorAll('.department-staff').forEach(el => el.style.display = 'none');
+        const block = document.getElementById('dept-' + deptId);
+        if (block) block.style.display = 'block';
+        document.querySelectorAll('.department-item').forEach(el => el.classList.remove('active-dept'));
+        const deptItem = document.querySelector(`[data-dept-id="${deptId}"]`);
+        if (deptItem) deptItem.classList.add('active-dept');
     }
 
     function selectStaff(id, name) {
@@ -364,5 +396,22 @@
         });
         window.location.href = `${url}?${p.toString()}`;
     }
+
+    function showDepartmentStaff(deptId) {
+        // 1. すべてのスタッフリスト（各部署のコンテナ）を非表示にする
+        document.querySelectorAll('.department-staff').forEach(el => {
+            el.style.display = 'none';
+        });
+
+        // 2. 選択された部署ID（deptId）に一致するリストを表示する
+        const selectedDept = document.getElementById(`dept-${deptId}`);
+        if (selectedDept) {
+            selectedDept.style.display = 'block';
+
+            // ページ上部にスクロールさせる（リストが長い場合の利便性）
+            selectedDept.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
 </script>
 {% endblock %}
