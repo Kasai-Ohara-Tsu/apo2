@@ -21,7 +21,7 @@
     </div>
 
     <div class="d-flex flex-column gap-3">
-        <a href="{% url 'frontend:cancel_from_waiting2' %}"
+        <a href="{% url 'frontend:cancel_from_waiting' %}"
             class="btn btn-secondary-custom btn-large w-100 d-flex align-items-center justify-content-center">
             キャンセル
         </a>
@@ -64,8 +64,7 @@
                     visit_type: visitType,
                     status: "notified",
                     purpose_preset: purposePreset,
-                    purpose_custom: purposeCustom,
-                            response_message: data.response_message || ""
+                    purpose_custom: purposeCustom
                 });
 
                 window.location.href = `{% url 'frontend:notification_complete' %}?` + params.toString();
@@ -99,8 +98,7 @@
                 visit_type: visitType,
                 status: "manager",
                 purpose_preset: purposePreset,
-                purpose_custom: purposeCustom,
-                            response_message: data.response_message || ""
+                purpose_custom: purposeCustom
             });
 
             window.location.href = `{% url 'frontend:reception_complete' %}?` + params.toString();
@@ -118,8 +116,8 @@
             fetch(`{% url 'frontend:check_visit_status' %}?staff_id=${staffId}&visitor_name=${encodeURIComponent(visitorName)}&visitor_company=${encodeURIComponent(visitorCompany)}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Visit status:', data.status, 'Message:', data.response_message);
-                    
+                    console.log('Visit status:', data.status);
+
                     // ステータスが「manager」(対応可能)になったら受付完了画面へ遷移
                     if (data.status === 'manager') {
                         clearInterval(pollingInterval);
@@ -132,8 +130,7 @@
                             visit_type: visitType,
                             status: "manager",
                             purpose_preset: purposePreset,
-                            purpose_custom: purposeCustom,
-                            response_message: data.response_message || ""
+                            purpose_custom: purposeCustom
                         });
 
                         window.location.href = `{% url 'frontend:reception_complete' %}?` + params.toString();
@@ -150,8 +147,7 @@
                             visit_type: visitType,
                             status: "notified",
                             purpose_preset: purposePreset,
-                            purpose_custom: purposeCustom,
-                            response_message: data.response_message || ""
+                            purpose_custom: purposeCustom
                         });
 
                         window.location.href = `{% url 'frontend:notification_complete' %}?` + params.toString();
